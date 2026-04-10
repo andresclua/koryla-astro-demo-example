@@ -13,7 +13,7 @@ interface Variant {
 }
 
 interface Experiment {
-  id: string; name: string; base_url: string
+  id: string; name: string; base_url: string; conversion_url?: string
   variants: Variant[]; destinations: unknown[]
 }
 
@@ -92,15 +92,39 @@ function createSplitEngine(options: { apiKey: string; apiUrl: string }) {
     return { experimentId: experiment.id, variantId, targetUrl: targetUrl.toString(), cookieName, isNewAssignment }
   }
 
-  return { process }
+  return { process, getActiveExperiments: getConfig }
 }
 
 // ── Netlify adapter ───────────────────────────────────────────────────────
 
-const engine = createSplitEngine({
-  apiKey: Deno.env.get('KORYLA_API_KEY') ?? '',
-  apiUrl: Deno.env.get('KORYLA_API_URL') ?? 'https://app.koryla.com',
-})
+const API_KEY = Deno.env.get('KORYLA_API_KEY') ?? ''
+const API_URL = Deno.env.get('KORYLA_API_URL') ?? 'https://app.koryla.com'
+
+const engine = createSplitEngine({ apiKey: API_KEY, apiUrl: API_URL })
+
+function getSessionId(cookies: Record<string, string>): string {
+  if (cookies['ky_session']) return cookies['ky_session']
+  // Generate a new session id — crypto.randomUUID() is available in Deno/edge
+  return crypto.randomUUID()
+}
+
+function fireEvent(payload: {
+  experiment_id: string
+  variant_id: string
+  session_id: string
+  event_type: 'impression' | 'conversion'
+  metadata?: Record<string, unknown>
+}) {
+  // Fire-and-forget — don't await so we don't add latency
+  fetch(`${API_URL}/api/worker/event`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${API_KEY}`,
+    },
+    body: JSON.stringify(payload),
+  }).catch(() => {})
+}
 
 interface NetlifyContext {
   next: () => Promise<Response>
@@ -108,23 +132,63 @@ interface NetlifyContext {
 }
 
 export default async function handler(request: Request, context: NetlifyContext): Promise<Response> {
-  const result = await engine.process(
-    request.url,
-    request.headers.get('cookie') ?? ''
-  )
+  const cookieHeader = request.headers.get('cookie') ?? ''
+  const result = await engine.process(request.url, cookieHeader)
 
-  if (!result) return context.next()
+  // Parse cookies to get/create session id
+  const cookies = Object.fromEntries(
+    cookieHeader.split(';').map(c => c.trim().split('=').map(s => s.trim())).filter(([k]) => k)
+  )
+  const sessionId = getSessionId(cookies)
+  const isNewSession = !cookies['ky_session']
+
+  if (!result) {
+    // Check if this is a conversion URL for any active experiment
+    const url = new URL(request.url)
+    const experiments = await engine.getActiveExperiments()
+    for (const exp of experiments) {
+      if (!exp.conversion_url) continue
+      try {
+        const convPath = new URL(exp.conversion_url).pathname
+        if (url.pathname === convPath) {
+          // Find which variant this session was assigned to
+          const variantCookieKey = Object.keys(cookies).find(k => k === `${COOKIE_PREFIX}${exp.id}`)
+          const variantId = variantCookieKey ? cookies[variantCookieKey] : null
+          if (variantId) {
+            fireEvent({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion' })
+          }
+        }
+      } catch { /* ignore */ }
+    }
+    return context.next()
+  }
 
   const response = await context.rewrite(result.targetUrl)
 
+  // Fire impression — always (deduplication happens server-side)
+  fireEvent({
+    experiment_id: result.experimentId,
+    variant_id: result.variantId,
+    session_id: sessionId,
+    event_type: 'impression',
+  })
+
+  const mutable = new Response(response.body, response)
+
   if (result.isNewAssignment) {
-    const mutable = new Response(response.body, response)
     mutable.headers.append(
       'Set-Cookie',
       `${result.cookieName}=${result.variantId}; Path=/; Max-Age=${60 * 60 * 24 * 30}; SameSite=Lax`
     )
-    return mutable
   }
 
-  return response
+  // Persist session id cookie if new
+  if (isNewSession) {
+    mutable.headers.append(
+      'Set-Cookie',
+      `ky_session=${sessionId}; Path=/; Max-Age=${60 * 60 * 24 * 365}; SameSite=Lax`
+    )
+  }
+
+  return mutable
 }
