@@ -2,6 +2,12 @@
   command = "npm run build"
   publish = "dist"
 
+[[redirects]]
+  from = "https://koryla-astro-demo-example.netlify.app/*"
+  to = "https://astro-demo.koryla.com/:splat"
+  status = 301
+  force = true
+
 [dev]
   command = "npm run dev"
   targetPort = 4321
