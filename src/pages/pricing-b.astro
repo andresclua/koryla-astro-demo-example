@@ -1,0 +1,58 @@
+---
+import Layout from '../layouts/Layout.astro'
+---
+<Layout title="Pricing" variant="variant-b — /pricing-b">
+  <main style="max-width:900px;margin:0 auto;padding:80px 40px;text-align:center">
+
+    <h1 style="font-size:48px;font-weight:800;letter-spacing:-1.5px;margin-bottom:12px;color:#0F2235">
+      Try free for <span style="color:#C96A3F">14 days</span>
+    </h1>
+    <p style="color:#6b7280;font-size:17px;margin-bottom:16px">No credit card needed. Cancel anytime.</p>
+
+    <!-- Toggle monthly/annual -->
+    <div style="display:inline-flex;align-items:center;gap:10px;background:#f3f4f6;border-radius:999px;padding:6px 16px;margin-bottom:48px;font-size:14px;font-weight:600">
+      <span style="color:#0F2235">Monthly</span>
+      <span style="color:#9ca3af">Annual</span>
+      <span style="background:#C96A3F;color:#fff;font-size:11px;padding:2px 8px;border-radius:999px">Save 20%</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:680px;margin:0 auto">
+      <!-- Starter -->
+      <div style="border:1px solid #e5e7eb;border-radius:24px;padding:32px;text-align:left;background:#fff">
+        <div style="width:36px;height:36px;background:#F5EDE0;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:18px">📊</div>
+        <p style="font-size:15px;font-weight:700;color:#0F2235;margin-bottom:4px">Starter</p>
+        <p style="font-size:13px;color:#9ca3af;margin-bottom:16px">For indie devs and small teams</p>
+        <p style="font-size:36px;font-weight:800;letter-spacing:-1px;margin-bottom:4px;color:#0F2235">$19</p>
+        <p style="color:#9ca3af;font-size:13px;margin-bottom:24px">/month · billed monthly</p>
+        <a href="/thank-you" style="display:block;text-align:center;background:#F5EDE0;color:#0F2235;border-radius:12px;padding:12px;font-size:14px;font-weight:600;margin-bottom:24px">
+          Start 14-day trial
+        </a>
+        <ul style="list-style:none;font-size:14px;color:#4b5563;display:flex;flex-direction:column;gap:8px">
+          <li style="display:flex;gap:8px"><span style="color:#C96A3F">✓</span> 500K events/mo</li>
+          <li style="display:flex;gap:8px"><span style="color:#C96A3F">✓</span> 5 sites</li>
+          <li style="display:flex;gap:8px"><span style="color:#C96A3F">✓</span> 6-month retention</li>
+        </ul>
+      </div>
+
+      <!-- Growth (highlighted) -->
+      <div style="border:2px solid #C96A3F;border-radius:24px;padding:32px;text-align:left;background:#FEF0E8;position:relative">
+        <div style="position:absolute;top:-13px;right:20px;background:#C96A3F;color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:999px">BEST VALUE</div>
+        <div style="width:36px;height:36px;background:#C96A3F;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:18px">🚀</div>
+        <p style="font-size:15px;font-weight:700;color:#0F2235;margin-bottom:4px">Growth</p>
+        <p style="font-size:13px;color:#A8522D;margin-bottom:16px">For growing products</p>
+        <p style="font-size:36px;font-weight:800;letter-spacing:-1px;color:#0F2235;margin-bottom:4px">$49</p>
+        <p style="color:#A8522D;font-size:13px;margin-bottom:24px">/month · billed monthly</p>
+        <a href="/thank-you" style="display:block;text-align:center;background:#C96A3F;color:#fff;border-radius:12px;padding:12px;font-size:14px;font-weight:700;margin-bottom:24px">
+          Start 14-day trial →
+        </a>
+        <ul style="list-style:none;font-size:14px;color:#0F2235;display:flex;flex-direction:column;gap:8px">
+          <li style="display:flex;gap:8px"><span>✓</span> Unlimited events</li>
+          <li style="display:flex;gap:8px"><span>✓</span> Unlimited sites</li>
+          <li style="display:flex;gap:8px"><span>✓</span> 2-year retention</li>
+          <li style="display:flex;gap:8px"><span>✓</span> A/B testing built in</li>
+        </ul>
+      </div>
+    </div>
+
+  </main>
+</Layout>

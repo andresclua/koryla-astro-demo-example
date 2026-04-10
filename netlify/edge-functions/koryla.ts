@@ -1,0 +1,130 @@
+/**
+ * Koryla A/B testing — Netlify Edge Function (self-contained)
+ *
+ * Core split engine inlined — no external dependencies needed.
+ * Set KORYLA_API_KEY and KORYLA_API_URL in Netlify environment variables.
+ */
+
+// ── Core engine (inlined) ─────────────────────────────────────────────────
+
+interface Variant {
+  id: string; name: string; traffic_weight: number
+  target_url: string; is_control: boolean
+}
+
+interface Experiment {
+  id: string; name: string; base_url: string
+  variants: Variant[]; destinations: unknown[]
+}
+
+interface SplitResult {
+  experimentId: string; variantId: string
+  targetUrl: string; cookieName: string; isNewAssignment: boolean
+}
+
+const COOKIE_PREFIX = 'ky_'
+const CACHE_TTL = 60_000
+
+function createSplitEngine(options: { apiKey: string; apiUrl: string }) {
+  const { apiKey, apiUrl } = options
+  let cachedExperiments: Experiment[] = []
+  let cachedAt = 0
+
+  async function getConfig(): Promise<Experiment[]> {
+    if (Date.now() - cachedAt < CACHE_TTL) return cachedExperiments
+    try {
+      const res = await fetch(`${apiUrl}/api/worker/config`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      })
+      if (!res.ok) return cachedExperiments
+      cachedExperiments = await res.json() as Experiment[]
+      cachedAt = Date.now()
+    } catch { /* network down — return stale cache */ }
+    return cachedExperiments
+  }
+
+  function assignVariant(variants: Pick<Variant, 'id' | 'traffic_weight'>[]): string {
+    const total = variants.reduce((s, v) => s + v.traffic_weight, 0)
+    let rand = Math.random() * total
+    for (const v of variants) { rand -= v.traffic_weight; if (rand <= 0) return v.id }
+    return variants[variants.length - 1].id
+  }
+
+  function parseCookies(header: string): Record<string, string> {
+    if (!header) return {}
+    return Object.fromEntries(
+      header.split(';').map(c => c.trim().split('=').map(s => s.trim())).filter(([k]) => k)
+    )
+  }
+
+  async function process(urlString: string, cookieHeader: string): Promise<SplitResult | null> {
+    const experiments = await getConfig()
+    if (!experiments.length) return null
+    let url: URL
+    try { url = new URL(urlString) } catch { return null }
+
+    // Sort by most specific (longest) base_url path first so /pricing
+    // matches before / when both experiments are active
+    const sorted = [...experiments].sort((a, b) => {
+      try {
+        return new URL(b.base_url).pathname.length - new URL(a.base_url).pathname.length
+      } catch { return 0 }
+    })
+    const experiment = sorted.find(e => {
+      try { return url.pathname.startsWith(new URL(e.base_url).pathname) } catch { return false }
+    })
+    if (!experiment?.variants.length) return null
+
+    const cookieName = `${COOKIE_PREFIX}${experiment.id}`
+    const cookies = parseCookies(cookieHeader)
+    let variantId = cookies[cookieName]
+    let isNewAssignment = false
+
+    if (!variantId || !experiment.variants.find(v => v.id === variantId)) {
+      variantId = assignVariant(experiment.variants)
+      isNewAssignment = true
+    }
+
+    const variant = experiment.variants.find(v => v.id === variantId)!
+    const targetUrl = new URL(urlString)
+    try { targetUrl.pathname = new URL(variant.target_url).pathname } catch { return null }
+
+    return { experimentId: experiment.id, variantId, targetUrl: targetUrl.toString(), cookieName, isNewAssignment }
+  }
+
+  return { process }
+}
+
+// ── Netlify adapter ───────────────────────────────────────────────────────
+
+const engine = createSplitEngine({
+  apiKey: Deno.env.get('KORYLA_API_KEY') ?? '',
+  apiUrl: Deno.env.get('KORYLA_API_URL') ?? 'https://app.koryla.com',
+})
+
+interface NetlifyContext {
+  next: () => Promise<Response>
+  rewrite: (url: string | URL) => Promise<Response>
+}
+
+export default async function handler(request: Request, context: NetlifyContext): Promise<Response> {
+  const result = await engine.process(
+    request.url,
+    request.headers.get('cookie') ?? ''
+  )
+
+  if (!result) return context.next()
+
+  const response = await context.rewrite(result.targetUrl)
+
+  if (result.isNewAssignment) {
+    const mutable = new Response(response.body, response)
+    mutable.headers.append(
+      'Set-Cookie',
+      `${result.cookieName}=${result.variantId}; Path=/; Max-Age=${60 * 60 * 24 * 30}; SameSite=Lax`
+    )
+    return mutable
+  }
+
+  return response
+}

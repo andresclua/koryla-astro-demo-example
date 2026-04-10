@@ -1,0 +1,52 @@
+---
+import Layout from '../layouts/Layout.astro'
+---
+<Layout title="Homepage" variant="variant-b — /variant-b">
+  <main style="max-width:1100px;margin:0 auto;padding:80px 40px">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:8px;background:#FEF0E8;color:#C96A3F;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;margin-bottom:24px">
+          <span style="width:6px;height:6px;background:#C96A3F;border-radius:50%;display:inline-block"></span>
+          NOW IN BETA · 1,200 TEAMS JOINED
+        </div>
+
+        <h1 style="font-size:clamp(36px,4vw,56px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px;color:#0F2235">
+          Stop guessing.<br/>
+          <span style="color:#C96A3F">Start knowing.</span>
+        </h1>
+
+        <p style="font-size:17px;color:#4b5563;line-height:1.65;margin-bottom:32px">
+          Beacon tracks every click, scroll, and session — privacy-first,
+          no cookies required. Set up in under 5 minutes.
+        </p>
+
+        <form style="display:flex;gap:8px;max-width:400px" action="/thank-you">
+          <input type="email" placeholder="you@company.com" style="flex:1;border:1px solid #d1d5db;border-radius:10px;padding:12px 16px;font-size:14px;outline:none;font-family:inherit" />
+          <button type="submit" style="background:#C96A3F;color:#fff;padding:12px 20px;border-radius:10px;font-weight:600;font-size:14px;border:none;cursor:pointer;white-space:nowrap;font-family:inherit">
+            Get early access
+          </button>
+        </form>
+        <p style="font-size:12px;color:#9ca3af;margin-top:10px">Join 1,200+ teams · No CC required</p>
+      </div>
+
+      <!-- Right side: feature list -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        {[
+          ['⚡', 'Real-time', 'See events as they happen, no delays.'],
+          ['🔒', 'Privacy-first', 'GDPR compliant, no personal data stored.'],
+          ['📦', '< 2KB', 'Lighter than Google Analytics by 20×.'],
+          ['🔌', 'Any stack', 'Works with Next.js, Astro, WordPress, and more.'],
+        ].map(([icon, title, desc]) => (
+          <div style="display:flex;gap:16px;align-items:flex-start;background:#F5EDE0;border:1px solid #EAD9C4;border-radius:14px;padding:16px 20px">
+            <span style="font-size:22px">{icon}</span>
+            <div>
+              <p style="font-size:14px;font-weight:700;color:#0F2235">{title}</p>
+              <p style="font-size:13px;color:#6b7280;margin-top:2px">{desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </main>
+</Layout>
