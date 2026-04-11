@@ -6,37 +6,41 @@ import Layout from '../layouts/Layout.astro'
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center">
       <div>
+        <!-- CHANGE 1 · Badge copy → social proof angle -->
         <div style="display:inline-flex;align-items:center;gap:8px;background:#FEF0E8;color:#C96A3F;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;margin-bottom:24px">
           <span style="width:6px;height:6px;background:#C96A3F;border-radius:50%;display:inline-block"></span>
-          NOW IN BETA · 1,200 TEAMS JOINED
+          TRUSTED BY 1,200 TEAMS · NO CREDIT CARD NEEDED
         </div>
 
+        <!-- CHANGE 2 · Headline → outcome-focused -->
         <h1 style="font-size:clamp(36px,4vw,56px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px;color:#0F2235">
-          Stop guessing.<br/>
-          <span style="color:#C96A3F">Start knowing.</span>
+          Your next best decision<br/>
+          <span style="color:#C96A3F">is one test away.</span>
         </h1>
 
+        <!-- CHANGE 3 · Body copy → faster, action-oriented -->
         <p style="font-size:17px;color:#4b5563;line-height:1.65;margin-bottom:32px">
-          Beacon tracks every click, scroll, and session — privacy-first,
-          no cookies required. Set up in under 5 minutes.
+          Run your first A/B test in under 5 minutes — no code changes,
+          no flicker, no developer bottleneck. Just results.
         </p>
 
+        <!-- CHANGE 4 · Button color navy #0F2235 instead of terracotta + new label -->
         <form style="display:flex;gap:8px;max-width:400px" action="/thank-you">
-          <input type="email" placeholder="you@company.com" style="flex:1;border:1px solid #d1d5db;border-radius:10px;padding:12px 16px;font-size:14px;outline:none;font-family:inherit" />
-          <button type="submit" style="background:#C96A3F;color:#fff;padding:12px 20px;border-radius:10px;font-weight:600;font-size:14px;border:none;cursor:pointer;white-space:nowrap;font-family:inherit">
-            Get early access
+          <input type="email" placeholder="Enter your work email" style="flex:1;border:1px solid #d1d5db;border-radius:10px;padding:12px 16px;font-size:14px;outline:none;font-family:inherit" />
+          <button type="submit" style="background:#0F2235;color:#fff;padding:12px 20px;border-radius:10px;font-weight:600;font-size:14px;border:none;cursor:pointer;white-space:nowrap;font-family:inherit">
+            Start free today
           </button>
         </form>
-        <p style="font-size:12px;color:#9ca3af;margin-top:10px">Join 1,200+ teams · No CC required</p>
+        <p style="font-size:12px;color:#9ca3af;margin-top:10px">Free forever on the hobby plan · Cancel anytime</p>
       </div>
 
-      <!-- Right side: feature list -->
+      <!-- Right side: feature list (same structure, updated copy) -->
       <div style="display:flex;flex-direction:column;gap:12px">
         {[
-          ['⚡', 'Real-time', 'See events as they happen, no delays.'],
-          ['🔒', 'Privacy-first', 'GDPR compliant, no personal data stored.'],
-          ['📦', '< 2KB', 'Lighter than Google Analytics by 20×.'],
-          ['🔌', 'Any stack', 'Works with Next.js, Astro, WordPress, and more.'],
+          ['⚡', 'Zero flicker', 'Variants are served before the browser renders anything.'],
+          ['🔒', 'No client JS', 'Works entirely server-side — ad blockers can\'t interfere.'],
+          ['📊', 'Live results', 'See impressions and conversions in your dashboard in real time.'],
+          ['🔌', 'Any stack', 'Next.js, Astro, WordPress, Nuxt — one API key, any platform.'],
         ].map(([icon, title, desc]) => (
           <div style="display:flex;gap:16px;align-items:flex-start;background:#F5EDE0;border:1px solid #EAD9C4;border-radius:14px;padding:16px 20px">
             <span style="font-size:22px">{icon}</span>

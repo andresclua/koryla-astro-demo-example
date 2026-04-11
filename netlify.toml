@@ -27,3 +27,7 @@
   function = "koryla"
   path = "/pricing"
 
+[[edge_functions]]
+  function = "koryla"
+  path = "/sdk-demo"
+

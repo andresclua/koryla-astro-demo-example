@@ -1,0 +1,117 @@
+---
+/**
+ * Component-level A/B test demo — shows @koryla/astro in action.
+ *
+ * This page tests a CTA section within a single page (instead of routing
+ * to a different URL). The edge function is NOT involved — variant assignment
+ * happens here in the frontmatter, server-side.
+ *
+ * In a real project: npm install @koryla/astro
+ * Here we use the inline helper at src/lib/getVariant.ts (same logic).
+ */
+import Layout from '../layouts/Layout.astro'
+import { getVariant } from '../lib/getVariant'
+
+const result = await getVariant(Astro.request, import.meta.env.KORYLA_COMPONENT_EXPERIMENT_ID ?? '', {
+  apiKey: import.meta.env.KORYLA_API_KEY ?? '',
+  apiUrl: import.meta.env.KORYLA_API_URL ?? 'https://koryla.com',
+})
+
+// Persist variant cookie on new assignment
+if (result?.isNewAssignment) {
+  Astro.cookies.set(result.cookieName, result.variantId, {
+    maxAge: 60 * 60 * 24 * 30,
+    sameSite: 'lax',
+    path: '/',
+  })
+}
+
+const isControl = !result || result.variant.is_control
+const variantLabel = result ? `${result.variant.name} (${result.variantId.slice(0, 8)}…)` : 'no experiment'
+---
+
+<Layout title="Component SDK Demo" variant={`sdk-demo · ${variantLabel}`}>
+  <main style="max-width:900px;margin:0 auto;padding:80px 40px">
+
+    <!-- Explanation banner -->
+    <div style="background:#F5EDE0;border:1px solid #EAD9C4;border-radius:16px;padding:24px 28px;margin-bottom:56px">
+      <p style="font-size:13px;font-weight:700;color:#C96A3F;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">
+        Component SDK Demo · @koryla/astro
+      </p>
+      <p style="font-size:15px;color:#0F2235;line-height:1.6;margin-bottom:0">
+        This page shows <strong>component-level A/B testing</strong> — not URL routing.
+        The edge function is not involved. Variant assignment happens in the Astro frontmatter using
+        <code style="background:#EAD9C4;padding:2px 6px;border-radius:4px;font-size:13px">getVariant()</code>,
+        which calls the Koryla API server-side and reads the visitor cookie.
+        Both variants render on the <em>same URL</em> (<code style="background:#EAD9C4;padding:2px 6px;border-radius:4px;font-size:13px">/sdk-demo</code>).
+      </p>
+    </div>
+
+    <!-- A/B tested CTA section -->
+    {isControl ? (
+      <!-- Control variant -->
+      <section style="text-align:center;padding:64px 40px;background:#fff;border:1px solid #e5e7eb;border-radius:24px">
+        <div style="display:inline-block;background:#FEF0E8;color:#C96A3F;font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;margin-bottom:20px;letter-spacing:.4px">
+          CONTROL VARIANT
+        </div>
+        <h2 style="font-size:clamp(28px,4vw,48px);font-weight:800;color:#0F2235;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.1">
+          Start testing in 5 minutes
+        </h2>
+        <p style="font-size:17px;color:#6b7280;max-width:480px;margin:0 auto 36px;line-height:1.6">
+          Deploy a Cloudflare Worker, create an experiment, and get live results — no code changes to your site.
+        </p>
+        <a href="/thank-you"
+           style="display:inline-block;background:#0F2235;color:#fff;padding:14px 32px;border-radius:12px;font-weight:600;font-size:15px;text-decoration:none">
+          Get started free
+        </a>
+        <p style="font-size:13px;color:#9ca3af;margin-top:14px">No credit card · Free forever on hobby plan</p>
+      </section>
+    ) : (
+      <!-- Variant B — different copy + terracotta CTA -->
+      <section style="text-align:center;padding:64px 40px;background:#FEF0E8;border:2px solid #F0C9B0;border-radius:24px">
+        <div style="display:inline-block;background:#C96A3F;color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;margin-bottom:20px;letter-spacing:.4px">
+          VARIANT B
+        </div>
+        <h2 style="font-size:clamp(28px,4vw,48px);font-weight:800;color:#0F2235;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.1">
+          A/B test anything — without touching your code
+        </h2>
+        <p style="font-size:17px;color:#6b7280;max-width:480px;margin:0 auto 36px;line-height:1.6">
+          Koryla runs at the edge. Your site stays exactly the same — the visitor just sees a different variant.
+        </p>
+        <a href="/thank-you"
+           style="display:inline-block;background:#C96A3F;color:#fff;padding:14px 32px;border-radius:12px;font-weight:600;font-size:15px;text-decoration:none">
+          Try Koryla free
+        </a>
+        <p style="font-size:13px;color:#9ca3af;margin-top:14px">No credit card · Unlimited experiments on growth plan</p>
+      </section>
+    )}
+
+    <!-- Code snippet explanation -->
+    <div style="margin-top:56px;background:#0F2235;border-radius:16px;padding:32px">
+      <p style="font-size:13px;font-weight:600;color:#F0C9B0;margin-bottom:16px;letter-spacing:.3px">HOW THIS PAGE WORKS — ASTRO FRONTMATTER</p>
+      <pre style="font-family:'Courier New',monospace;font-size:13px;color:#e5e7eb;line-height:1.7;overflow-x:auto;white-space:pre-wrap"><code>import &#123; getVariant &#125; from '@koryla/astro'
+
+const result = await getVariant(Astro.request, 'exp-id', &#123;
+  apiKey: import.meta.env.KORYLA_API_KEY,
+  apiUrl: import.meta.env.KORYLA_API_URL,
+&#125;)
+
+if (result?.isNewAssignment) &#123;
+  Astro.cookies.set(result.cookieName, result.variantId, &#123;
+    maxAge: 60 * 60 * 24 * 30,
+    path: '/',
+  &#125;)
+&#125;
+
+const isControl = !result || result.variant.is_control</code></pre>
+    </div>
+
+    <!-- Navigation -->
+    <div style="margin-top:40px;display:flex;gap:12px;justify-content:center">
+      <a href="/" style="color:#C96A3F;font-size:14px;font-weight:600">← Homepage (URL-rewrite demo)</a>
+      <span style="color:#d1d5db">·</span>
+      <a href="/pricing" style="color:#C96A3F;font-size:14px;font-weight:600">Pricing demo →</a>
+    </div>
+
+  </main>
+</Layout>
