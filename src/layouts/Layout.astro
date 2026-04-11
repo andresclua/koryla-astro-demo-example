@@ -10,7 +10,7 @@ const { title, variant = 'control' } = Astro.props
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{title} — Beacon</title>
+  <title>{title} — Koryla</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -31,15 +31,21 @@ const { title, variant = 'control' } = Astro.props
 </head>
 <body>
   <!-- Debug badge — makes it obvious which variant you're seeing -->
-  <div style="position:fixed;bottom:16px;right:16px;z-index:999;background:#0F2235;color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:999px;letter-spacing:.5px;opacity:.9">
-    Koryla · {variant}
-  </div>
+  {variant && (
+    <div style="position:fixed;bottom:16px;right:16px;z-index:999;background:#0F2235;color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:999px;letter-spacing:.5px;opacity:.9">
+      Koryla · {variant}
+    </div>
+  )}
 
   <nav style="border-bottom:1px solid #e5e7eb;padding:0 40px;height:60px;display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;width:100%">
-    <span style="font-weight:700;font-size:18px;color:#0F2235">Beacon</span>
+    <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+      <span style="font-weight:700;font-size:16px;color:#0F2235">Koryla</span>
+      <span style="color:#e5e7eb">·</span>
+      <span style="font-size:14px;color:#9ca3af;font-weight:500">Astro Demo</span>
+    </a>
     <div style="display:flex;gap:24px;font-size:14px;color:#6b7280;align-items:center">
       <a href="/pricing">Pricing</a>
-      <a href="/sdk-demo" style="color:#C96A3F;font-weight:600">Component demo</a>
+      <a href="/hero" style="color:#C96A3F;font-weight:600">Layout demo</a>
       <a href="/thank-you" style="background:#C96A3F;color:#fff;padding:8px 18px;border-radius:8px;font-weight:600">Get started</a>
     </div>
   </nav>
