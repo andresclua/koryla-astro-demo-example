@@ -65,40 +65,121 @@ import Layout from '../layouts/Layout.astro'
         animate: true,
         overlayOpacity: 0.6,
         showProgress: true,
+        popoverClass: 'koryla-tour',
         steps: [
           {
             element: '#tour-badge',
             popover: {
               title: 'Change 1 — Social proof badge',
-              description: '<p style="margin-bottom:8px;color:#6b7280;font-size:13px">Control showed a plain "BETA" label. This variant uses social proof copy to build trust immediately.</p><pre style="background:#f3f4f6;padding:10px;border-radius:6px;font-size:12px;overflow:auto;white-space:pre">&lt;KVariant id="b"&gt;\n  TRUSTED BY 1,200 TEAMS\n&lt;/KVariant&gt;</pre>'
+              side: 'bottom',
+              align: 'start',
+              description: `<p style="margin-bottom:10px;color:#6b7280;font-size:13px;line-height:1.5">Control showed a plain "BETA" label. Variant b uses social proof copy to build immediate trust.</p>
+<pre style="background:#0F2235;color:#F5EDE0;padding:14px 16px;border-radius:8px;font-size:12px;line-height:1.7;overflow:auto;white-space:pre">
+<span style="color:#9ca3af">// variant-b.astro</span>
+&lt;<span style="color:#C96A3F">KVariant</span> id=<span style="color:#a3e635">"b"</span>&gt;
+  &lt;div class=<span style="color:#a3e635">"badge"</span>&gt;
+    TRUSTED BY 1,200 TEAMS
+    · NO CREDIT CARD NEEDED
+  &lt;/div&gt;
+&lt;/<span style="color:#C96A3F">KVariant</span>&gt;
+
+<span style="color:#9ca3af">// Koryla assigns this variant</span>
+<span style="color:#9ca3af">// at the edge — zero flicker</span>
+</pre>`
             }
           },
           {
             element: '#tour-headline',
             popover: {
               title: 'Change 2 — Outcome-focused headline',
-              description: '<p style="margin-bottom:8px;color:#6b7280;font-size:13px">Control was feature-focused. This variant leads with the outcome visitors care about.</p><pre style="background:#f3f4f6;padding:10px;border-radius:6px;font-size:12px;overflow:auto;white-space:pre">const { variant } = await getVariant(\n  request, \'hero-headline\'\n)\n// variant.id === \'b\'</pre>'
+              side: 'bottom',
+              align: 'start',
+              description: `<p style="margin-bottom:10px;color:#6b7280;font-size:13px;line-height:1.5">Control: "The fastest way to run A/B tests". Variant b: leads with the user's outcome, not the product's feature.</p>
+<pre style="background:#0F2235;color:#F5EDE0;padding:14px 16px;border-radius:8px;font-size:12px;line-height:1.7;overflow:auto;white-space:pre">
+<span style="color:#9ca3af">// pages/index.astro</span>
+<span style="color:#60a5fa">const</span> variant = <span style="color:#60a5fa">await</span> getVariant(
+  Astro.request,
+  <span style="color:#a3e635">'hero-headline'</span>
+)
+
+<span style="color:#9ca3af">// variant.id === 'b'</span>
+<span style="color:#9ca3af">// assigned in &lt;1ms at the edge</span>
+<span style="color:#9ca3af">// stored in cookie ky_hero-headline</span>
+</pre>`
             }
           },
           {
             element: '#tour-body',
             popover: {
               title: 'Change 3 — Action-oriented body copy',
-              description: '<p style="margin-bottom:8px;color:#6b7280;font-size:13px">A single punchy promise replaces a feature list — emphasising time-to-value.</p><pre style="background:#f3f4f6;padding:10px;border-radius:6px;font-size:12px;overflow:auto;white-space:pre">&lt;Experiment variantId={variant?.id}&gt;\n  &lt;Variant id="control"&gt;\n    ...long feature list\n  &lt;/Variant&gt;\n  &lt;Variant id="b"&gt;\n    Run your first A/B test\n    in under 5 minutes\n  &lt;/Variant&gt;\n&lt;/Experiment&gt;</pre>'
+              side: 'bottom',
+              align: 'start',
+              description: `<p style="margin-bottom:10px;color:#6b7280;font-size:13px;line-height:1.5">Control listed 3 features. Variant b makes a single punchy promise focused on time-to-value.</p>
+<pre style="background:#0F2235;color:#F5EDE0;padding:14px 16px;border-radius:8px;font-size:12px;line-height:1.7;overflow:auto;white-space:pre">
+<span style="color:#9ca3af">// @koryla/react</span>
+&lt;<span style="color:#C96A3F">Experiment</span> variantId={variant?.id}&gt;
+  &lt;<span style="color:#C96A3F">Variant</span> id=<span style="color:#a3e635">"control"</span>&gt;
+    &lt;p&gt;The fastest way to ship
+    A/B tests on any platform.&lt;/p&gt;
+  &lt;/<span style="color:#C96A3F">Variant</span>&gt;
+  &lt;<span style="color:#C96A3F">Variant</span> id=<span style="color:#a3e635">"b"</span>&gt;
+    &lt;p&gt;Run your first A/B test
+    in under 5 minutes — no code
+    changes, no flicker.&lt;/p&gt;
+  &lt;/<span style="color:#C96A3F">Variant</span>&gt;
+&lt;/<span style="color:#C96A3F">Experiment</span>&gt;
+</pre>`
             }
           },
           {
             element: '#tour-cta',
             popover: {
-              title: 'Change 4 — Navy CTA, no email input',
-              description: '<p style="margin-bottom:8px;color:#6b7280;font-size:13px">Control had a terracotta "Get started" + email field. Variant removes the input entirely to reduce friction, and switches to navy #0F2235.</p><pre style="background:#f3f4f6;padding:10px;border-radius:6px;font-size:12px;overflow:auto;white-space:pre">// before\n&lt;form&gt;\n  &lt;input type="email" /&gt;\n  &lt;button&gt;Get started&lt;/button&gt;\n&lt;/form&gt;\n\n// after\n&lt;a href="/thank-you"&gt;\n  Start free today\n&lt;/a&gt;</pre>'
+              title: 'Change 4 — Navy CTA, no email gate',
+              side: 'top',
+              align: 'start',
+              description: `<p style="margin-bottom:10px;color:#6b7280;font-size:13px;line-height:1.5">Control had a terracotta button + email input. Variant b removes the email field entirely to reduce friction.</p>
+<pre style="background:#0F2235;color:#F5EDE0;padding:14px 16px;border-radius:8px;font-size:12px;line-height:1.7;overflow:auto;white-space:pre">
+<span style="color:#9ca3af">// CONTROL</span>
+&lt;form action=<span style="color:#a3e635">"/thank-you"</span>&gt;
+  &lt;input type=<span style="color:#a3e635">"email"</span>
+    placeholder=<span style="color:#a3e635">"Work email"</span> /&gt;
+  &lt;button style=<span style="color:#a3e635">"background:#C96A3F"</span>&gt;
+    Get started
+  &lt;/button&gt;
+&lt;/form&gt;
+
+<span style="color:#9ca3af">// VARIANT B — less friction</span>
+&lt;a href=<span style="color:#a3e635">"/thank-you"</span>
+  style=<span style="color:#a3e635">"background:#0F2235"</span>&gt;
+  Start free today
+&lt;/a&gt;
+</pre>`
             }
           },
           {
             element: '#tour-cards',
             popover: {
               title: 'Change 5 — Feature cards replace screenshot',
-              description: '<p style="margin-bottom:8px;color:#6b7280;font-size:13px">Control showed a product screenshot. Variant surfaces four specific value props in scannable cards using the Koryla sand palette.</p><pre style="background:#f3f4f6;padding:10px;border-radius:6px;font-size:12px;overflow:auto;white-space:pre">background: #F5EDE0;\nborder: 1px solid #EAD9C4;\nborder-radius: 14px;</pre>'
+              side: 'left',
+              align: 'start',
+              description: `<p style="margin-bottom:10px;color:#6b7280;font-size:13px;line-height:1.5">Control showed a generic product screenshot. Variant b surfaces four concrete value props using the Koryla sand palette.</p>
+<pre style="background:#0F2235;color:#F5EDE0;padding:14px 16px;border-radius:8px;font-size:12px;line-height:1.7;overflow:auto;white-space:pre">
+<span style="color:#9ca3af">// each card — sand palette</span>
+{[
+  [<span style="color:#a3e635">'⚡'</span>, <span style="color:#a3e635">'Zero flicker'</span>,
+    <span style="color:#a3e635">'Served before render'</span>],
+  [<span style="color:#a3e635">'🔒'</span>, <span style="color:#a3e635">'No client JS'</span>,
+    <span style="color:#a3e635">'Ad-blocker proof'</span>],
+  [<span style="color:#a3e635">'📊'</span>, <span style="color:#a3e635">'Live results'</span>,
+    <span style="color:#a3e635">'Real-time dashboard'</span>],
+  [<span style="color:#a3e635">'🔌'</span>, <span style="color:#a3e635">'Any stack'</span>,
+    <span style="color:#a3e635">'One API key'</span>],
+].map(([icon, title, desc]) =&gt; (
+  &lt;Card
+    background=<span style="color:#a3e635">"#F5EDE0"</span>
+    border=<span style="color:#a3e635">"#EAD9C4"</span> /&gt;
+))}
+</pre>`
             }
           }
         ]
