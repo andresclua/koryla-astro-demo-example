@@ -8,6 +8,13 @@
   status = 301
   force = true
 
+# Legacy redirect — variant-b renamed to hero-b
+[[redirects]]
+  from = "/variant-b"
+  to = "/hero-b"
+  status = 301
+  force = true
+
 [dev]
   command = "npm run dev"
   targetPort = 4321
