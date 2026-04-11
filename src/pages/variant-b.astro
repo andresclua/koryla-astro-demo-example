@@ -2,40 +2,44 @@
 import Layout from '../layouts/Layout.astro'
 ---
 <Layout title="Homepage" variant="variant-b — /variant-b">
+  <link slot="head" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css" />
+
   <main style="max-width:1100px;margin:0 auto;padding:80px 40px">
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center">
       <div>
         <!-- CHANGE 1 · Badge copy → social proof angle -->
-        <div style="display:inline-flex;align-items:center;gap:8px;background:#FEF0E8;color:#C96A3F;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;margin-bottom:24px">
+        <div id="tour-badge" style="display:inline-flex;align-items:center;gap:8px;background:#FEF0E8;color:#C96A3F;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;margin-bottom:24px">
           <span style="width:6px;height:6px;background:#C96A3F;border-radius:50%;display:inline-block"></span>
           TRUSTED BY 1,200 TEAMS · NO CREDIT CARD NEEDED
         </div>
 
         <!-- CHANGE 2 · Headline → outcome-focused -->
-        <h1 style="font-size:clamp(36px,4vw,56px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px;color:#0F2235">
+        <h1 id="tour-headline" style="font-size:clamp(36px,4vw,56px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px;color:#0F2235">
           Your next best decision<br/>
           <span style="color:#C96A3F">is one test away.</span>
         </h1>
 
         <!-- CHANGE 3 · Body copy → faster, action-oriented -->
-        <p style="font-size:17px;color:#4b5563;line-height:1.65;margin-bottom:32px">
+        <p id="tour-body" style="font-size:17px;color:#4b5563;line-height:1.65;margin-bottom:32px">
           Run your first A/B test in under 5 minutes — no code changes,
           no flicker, no developer bottleneck. Just results.
         </p>
 
-        <!-- CHANGE 4 · Button color navy #0F2235 instead of terracotta + new label -->
-        <form style="display:flex;gap:8px;max-width:400px" action="/thank-you">
-          <input type="email" placeholder="Enter your work email" style="flex:1;border:1px solid #d1d5db;border-radius:10px;padding:12px 16px;font-size:14px;outline:none;font-family:inherit" />
-          <button type="submit" style="background:#0F2235;color:#fff;padding:12px 20px;border-radius:10px;font-weight:600;font-size:14px;border:none;cursor:pointer;white-space:nowrap;font-family:inherit">
+        <!-- CHANGE 4 · Plain CTA anchor, no email input, navy #0F2235 -->
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:12px">
+          <a id="tour-cta" href="/thank-you" style="display:inline-block;background:#0F2235;color:#fff;padding:12px 24px;border-radius:10px;font-weight:600;font-size:14px;text-decoration:none;cursor:pointer">
             Start free today
+          </a>
+          <button id="tour-trigger" style="background:none;border:1px solid #d1d5db;color:#6b7280;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+            See what changed →
           </button>
-        </form>
+        </div>
         <p style="font-size:12px;color:#9ca3af;margin-top:10px">Free forever on the hobby plan · Cancel anytime</p>
       </div>
 
-      <!-- Right side: feature list (same structure, updated copy) -->
-      <div style="display:flex;flex-direction:column;gap:12px">
+      <!-- Right side: feature cards -->
+      <div id="tour-cards" style="display:flex;flex-direction:column;gap:12px">
         {[
           ['⚡', 'Zero flicker', 'Variants are served before the browser renders anything.'],
           ['🔒', 'No client JS', 'Works entirely server-side — ad blockers can\'t interfere.'],
@@ -53,4 +57,53 @@ import Layout from '../layouts/Layout.astro'
       </div>
     </div>
   </main>
+
+  <script is:inline src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+  <script is:inline>
+    document.getElementById('tour-trigger').addEventListener('click', function () {
+      const driver = window.driver.js.driver({
+        animate: true,
+        overlayOpacity: 0.6,
+        showProgress: true,
+        steps: [
+          {
+            element: '#tour-badge',
+            popover: {
+              title: 'Change 1 — Social proof badge',
+              description: '<p style="margin-bottom:8px;color:#6b7280;font-size:13px">Control showed a plain "BETA" label. This variant uses social proof copy to build trust immediately.</p><pre style="background:#f3f4f6;padding:10px;border-radius:6px;font-size:12px;overflow:auto;white-space:pre">&lt;KVariant id="b"&gt;\n  TRUSTED BY 1,200 TEAMS\n&lt;/KVariant&gt;</pre>'
+            }
+          },
+          {
+            element: '#tour-headline',
+            popover: {
+              title: 'Change 2 — Outcome-focused headline',
+              description: '<p style="margin-bottom:8px;color:#6b7280;font-size:13px">Control was feature-focused. This variant leads with the outcome visitors care about.</p><pre style="background:#f3f4f6;padding:10px;border-radius:6px;font-size:12px;overflow:auto;white-space:pre">const { variant } = await getVariant(\n  request, \'hero-headline\'\n)\n// variant.id === \'b\'</pre>'
+            }
+          },
+          {
+            element: '#tour-body',
+            popover: {
+              title: 'Change 3 — Action-oriented body copy',
+              description: '<p style="margin-bottom:8px;color:#6b7280;font-size:13px">A single punchy promise replaces a feature list — emphasising time-to-value.</p><pre style="background:#f3f4f6;padding:10px;border-radius:6px;font-size:12px;overflow:auto;white-space:pre">&lt;Experiment variantId={variant?.id}&gt;\n  &lt;Variant id="control"&gt;\n    ...long feature list\n  &lt;/Variant&gt;\n  &lt;Variant id="b"&gt;\n    Run your first A/B test\n    in under 5 minutes\n  &lt;/Variant&gt;\n&lt;/Experiment&gt;</pre>'
+            }
+          },
+          {
+            element: '#tour-cta',
+            popover: {
+              title: 'Change 4 — Navy CTA, no email input',
+              description: '<p style="margin-bottom:8px;color:#6b7280;font-size:13px">Control had a terracotta "Get started" + email field. Variant removes the input entirely to reduce friction, and switches to navy #0F2235.</p><pre style="background:#f3f4f6;padding:10px;border-radius:6px;font-size:12px;overflow:auto;white-space:pre">// before\n&lt;form&gt;\n  &lt;input type="email" /&gt;\n  &lt;button&gt;Get started&lt;/button&gt;\n&lt;/form&gt;\n\n// after\n&lt;a href="/thank-you"&gt;\n  Start free today\n&lt;/a&gt;</pre>'
+            }
+          },
+          {
+            element: '#tour-cards',
+            popover: {
+              title: 'Change 5 — Feature cards replace screenshot',
+              description: '<p style="margin-bottom:8px;color:#6b7280;font-size:13px">Control showed a product screenshot. Variant surfaces four specific value props in scannable cards using the Koryla sand palette.</p><pre style="background:#f3f4f6;padding:10px;border-radius:6px;font-size:12px;overflow:auto;white-space:pre">background: #F5EDE0;\nborder: 1px solid #EAD9C4;\nborder-radius: 14px;</pre>'
+            }
+          }
+        ]
+      })
+      driver.drive()
+    })
+  </script>
 </Layout>

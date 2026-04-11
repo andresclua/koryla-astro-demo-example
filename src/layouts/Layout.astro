@@ -27,6 +27,7 @@ const { title, variant = 'control' } = Astro.props
     body { font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif; background: #fff; color: #0F2235 }
     a { color: inherit; text-decoration: none }
   </style>
+  <slot name="head" />
 </head>
 <body>
   <!-- Debug badge — makes it obvious which variant you're seeing -->
