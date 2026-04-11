@@ -108,22 +108,23 @@ function getSessionId(cookies: Record<string, string>): string {
   return crypto.randomUUID()
 }
 
-function fireEvent(payload: {
+async function fireEvent(payload: {
   experiment_id: string
   variant_id: string
   session_id: string
   event_type: 'impression' | 'conversion'
   metadata?: Record<string, unknown>
 }) {
-  // Fire-and-forget — don't await so we don't add latency
-  fetch(`${API_URL}/api/worker/event`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${API_KEY}`,
-    },
-    body: JSON.stringify(payload),
-  }).catch(() => {})
+  try {
+    await fetch(`${API_URL}/api/worker/event`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify(payload),
+    })
+  } catch { /* ignore network errors */ }
 }
 
 interface NetlifyContext {
@@ -150,12 +151,11 @@ export default async function handler(request: Request, context: NetlifyContext)
       if (!exp.conversion_url) continue
       try {
         const convPath = new URL(exp.conversion_url).pathname
-        if (url.pathname === convPath) {
-          // Find which variant this session was assigned to
-          const variantCookieKey = Object.keys(cookies).find(k => k === `${COOKIE_PREFIX}${exp.id}`)
-          const variantId = variantCookieKey ? cookies[variantCookieKey] : null
+        if (url.pathname === convPath || url.pathname === convPath + '/') {
+          const variantCookieKey = `${COOKIE_PREFIX}${exp.id}`
+          const variantId = cookies[variantCookieKey] ?? null
           if (variantId) {
-            fireEvent({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion' })
+            await fireEvent({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion' })
           }
         }
       } catch { /* ignore */ }
@@ -163,15 +163,20 @@ export default async function handler(request: Request, context: NetlifyContext)
     return context.next()
   }
 
-  const response = await context.rewrite(result.targetUrl)
+  // Skip rewrite if target path is the same as request path (avoids redirect loop on control)
+  const requestPath = new URL(request.url).pathname
+  const targetPath = new URL(result.targetUrl).pathname
+  const isSamePath = requestPath === targetPath || requestPath === targetPath + '/' || requestPath + '/' === targetPath
 
-  // Fire impression — always (deduplication happens server-side)
-  fireEvent({
+  // Fire impression before serving
+  await fireEvent({
     experiment_id: result.experimentId,
     variant_id: result.variantId,
     session_id: sessionId,
     event_type: 'impression',
   })
+
+  const response = isSamePath ? await context.next() : await context.rewrite(result.targetUrl)
 
   const mutable = new Response(response.body, response)
 
