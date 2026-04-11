@@ -138,7 +138,6 @@ interface NetlifyContext {
 
 export default async function handler(request: Request, context: NetlifyContext): Promise<Response> {
   const cookieHeader = request.headers.get('cookie') ?? ''
-  const result = await engine.process(request.url, cookieHeader)
 
   // Parse cookies to get/create session id
   const cookies = Object.fromEntries(
@@ -147,25 +146,29 @@ export default async function handler(request: Request, context: NetlifyContext)
   const sessionId = getSessionId(cookies)
   const isNewSession = !cookies['ky_session']
 
-  if (!result) {
-    // Check if this is a conversion URL for any active experiment
-    const url = new URL(request.url)
-    const experiments = await engine.getActiveExperiments()
-    for (const exp of experiments) {
-      if (!exp.conversion_url) continue
-      try {
-        const convPath = new URL(exp.conversion_url).pathname
-        if (url.pathname === convPath || url.pathname === convPath + '/') {
-          const variantCookieKey = `${COOKIE_PREFIX}${exp.id}`
-          const variantId = cookies[variantCookieKey] ?? null
-          if (variantId) {
-            await fireEvent({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion' })
-          }
+  // Check conversion URLs FIRST — before any experiment routing
+  // This prevents conversion pages from being accidentally rewritten
+  const reqUrl = new URL(request.url)
+  const experiments = await engine.getActiveExperiments()
+  for (const exp of experiments) {
+    if (!exp.conversion_url) continue
+    try {
+      const convPath = new URL(exp.conversion_url).pathname.replace(/\/$/, '') || '/'
+      const reqPath = reqUrl.pathname.replace(/\/$/, '') || '/'
+      if (reqPath === convPath) {
+        const variantCookieKey = `${COOKIE_PREFIX}${exp.id}`
+        const variantId = cookies[variantCookieKey] ?? null
+        if (variantId) {
+          await fireEvent({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion' })
         }
-      } catch { /* ignore */ }
-    }
-    return context.next()
+        return context.next()
+      }
+    } catch { /* ignore */ }
   }
+
+  const result = await engine.process(request.url, cookieHeader)
+
+  if (!result) return context.next()
 
   // Skip rewrite if target path is the same as request path (avoids redirect loop on control)
   const requestPath = new URL(request.url).pathname
