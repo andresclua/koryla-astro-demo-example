@@ -71,7 +71,11 @@ function createSplitEngine(options: { apiKey: string; apiUrl: string }) {
       } catch { return 0 }
     })
     const experiment = sorted.find(e => {
-      try { return url.pathname.startsWith(new URL(e.base_url).pathname) } catch { return false }
+      try {
+        const basePath = new URL(e.base_url).pathname.replace(/\/$/, '') || '/'
+        const reqPath = url.pathname.replace(/\/$/, '') || '/'
+        return reqPath === basePath
+      } catch { return false }
     })
     if (!experiment?.variants.length) return null
 
