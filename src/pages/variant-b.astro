@@ -3,9 +3,22 @@ import Layout from '../layouts/Layout.astro'
 ---
 <Layout title="Homepage" variant="variant-b — /variant-b">
   <link slot="head" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css" />
+  <style slot="head">
+    @keyframes koryla-glow {
+      0%, 100% { box-shadow: 0 0 12px 2px rgba(201,106,63,0.5); }
+      50%       { box-shadow: 0 0 24px 6px rgba(201,106,63,0.9); }
+    }
+    #tour-trigger {
+      animation: koryla-glow 2s ease-in-out infinite;
+    }
+    #tour-trigger:hover {
+      background: #FEF0E8 !important;
+      color: #C96A3F !important;
+      border-color: #C96A3F !important;
+    }
+  </style>
 
   <main style="max-width:1100px;margin:0 auto;padding:80px 40px">
-
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center">
       <div>
         <!-- CHANGE 1 · Badge copy → social proof angle -->
@@ -27,13 +40,10 @@ import Layout from '../layouts/Layout.astro'
         </p>
 
         <!-- CHANGE 4 · Plain CTA anchor, no email input, navy #0F2235 -->
-        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:12px">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:0">
           <a id="tour-cta" href="/thank-you" style="display:inline-block;background:#0F2235;color:#fff;padding:12px 24px;border-radius:10px;font-weight:600;font-size:14px;text-decoration:none;cursor:pointer">
             Start free today
           </a>
-          <button id="tour-trigger" style="background:none;border:1px solid #d1d5db;color:#6b7280;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
-            See what changed →
-          </button>
         </div>
         <p style="font-size:12px;color:#9ca3af;margin-top:10px">Free forever on the hobby plan · Cancel anytime</p>
       </div>
@@ -57,6 +67,11 @@ import Layout from '../layouts/Layout.astro'
       </div>
     </div>
   </main>
+
+  <!-- Fixed bottom-left tour trigger -->
+  <button id="tour-trigger" style="position:fixed;bottom:24px;left:24px;z-index:9999;background:#fff;border:1.5px solid #C96A3F;color:#C96A3F;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s,color .2s,border-color .2s">
+    See what Koryla can do →
+  </button>
 
   <script is:inline src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
   <script is:inline>
@@ -94,7 +109,7 @@ import Layout from '../layouts/Layout.astro'
               title: 'Change 2 — Outcome-focused headline',
               side: 'bottom',
               align: 'start',
-              description: `<p style="margin-bottom:10px;color:#6b7280;font-size:13px;line-height:1.5">Control: "The fastest way to run A/B tests". Variant b: leads with the user's outcome, not the product's feature.</p>
+              description: `<p style="margin-bottom:10px;color:#6b7280;font-size:13px;line-height:1.5">Control: "The fastest way to run A/B tests". Variant b: leads with the user's outcome, not the product feature.</p>
 <pre style="background:#0F2235;color:#F5EDE0;padding:14px 16px;border-radius:8px;font-size:12px;line-height:1.7;overflow:auto;white-space:pre">
 <span style="color:#9ca3af">// pages/index.astro</span>
 <span style="color:#60a5fa">const</span> variant = <span style="color:#60a5fa">await</span> getVariant(
@@ -104,7 +119,7 @@ import Layout from '../layouts/Layout.astro'
 
 <span style="color:#9ca3af">// variant.id === 'b'</span>
 <span style="color:#9ca3af">// assigned in &lt;1ms at the edge</span>
-<span style="color:#9ca3af">// stored in cookie ky_hero-headline</span>
+<span style="color:#9ca3af">// cookie: ky_hero-headline</span>
 </pre>`
             }
           },
@@ -137,7 +152,7 @@ import Layout from '../layouts/Layout.astro'
               title: 'Change 4 — Navy CTA, no email gate',
               side: 'top',
               align: 'start',
-              description: `<p style="margin-bottom:10px;color:#6b7280;font-size:13px;line-height:1.5">Control had a terracotta button + email input. Variant b removes the email field entirely to reduce friction.</p>
+              description: `<p style="margin-bottom:10px;color:#6b7280;font-size:13px;line-height:1.5">Control had a terracotta button + email input. Variant b removes the field entirely to reduce friction.</p>
 <pre style="background:#0F2235;color:#F5EDE0;padding:14px 16px;border-radius:8px;font-size:12px;line-height:1.7;overflow:auto;white-space:pre">
 <span style="color:#9ca3af">// CONTROL</span>
 &lt;form action=<span style="color:#a3e635">"/thank-you"</span>&gt;
@@ -150,7 +165,7 @@ import Layout from '../layouts/Layout.astro'
 
 <span style="color:#9ca3af">// VARIANT B — less friction</span>
 &lt;a href=<span style="color:#a3e635">"/thank-you"</span>
-  style=<span style="color:#a3e635">"background:#0F2235"</span>&gt;
+   style=<span style="color:#a3e635">"background:#0F2235"</span>&gt;
   Start free today
 &lt;/a&gt;
 </pre>`
@@ -162,7 +177,7 @@ import Layout from '../layouts/Layout.astro'
               title: 'Change 5 — Feature cards replace screenshot',
               side: 'left',
               align: 'start',
-              description: `<p style="margin-bottom:10px;color:#6b7280;font-size:13px;line-height:1.5">Control showed a generic product screenshot. Variant b surfaces four concrete value props using the Koryla sand palette.</p>
+              description: `<p style="margin-bottom:10px;color:#6b7280;font-size:13px;line-height:1.5">Control showed a generic product screenshot. Variant b surfaces four concrete value props in scannable cards.</p>
 <pre style="background:#0F2235;color:#F5EDE0;padding:14px 16px;border-radius:8px;font-size:12px;line-height:1.7;overflow:auto;white-space:pre">
 <span style="color:#9ca3af">// each card — sand palette</span>
 {[
@@ -179,6 +194,38 @@ import Layout from '../layouts/Layout.astro'
     background=<span style="color:#a3e635">"#F5EDE0"</span>
     border=<span style="color:#a3e635">"#EAD9C4"</span> /&gt;
 ))}
+</pre>`
+            }
+          },
+          {
+            element: '#tour-cards',
+            popover: {
+              title: 'Bonus — Dual analytics reporting',
+              side: 'left',
+              align: 'start',
+              description: `<p style="margin-bottom:10px;color:#6b7280;font-size:13px;line-height:1.5">Koryla reports to its own dashboard <em>and</em> fires an <code style="background:#1e3a5f;padding:2px 6px;border-radius:4px;color:#a3e635">onAssigned</code> callback so you can push the same event to PostHog, GA4, or Segment — no extra setup.</p>
+<pre style="background:#0F2235;color:#F5EDE0;padding:14px 16px;border-radius:8px;font-size:12px;line-height:1.7;overflow:auto;white-space:pre">
+<span style="color:#9ca3af">// @koryla/react — dual reporting</span>
+&lt;<span style="color:#C96A3F">Experiment</span>
+  variantId={variant?.id}
+  onAssigned={(variantId) =&gt; {
+    <span style="color:#9ca3af">// Koryla dashboard ← automatic</span>
+
+    <span style="color:#9ca3af">// PostHog</span>
+    posthog.capture(<span style="color:#a3e635">'experiment_viewed'</span>, {
+      experiment: <span style="color:#a3e635">'hero-headline'</span>,
+      variant: variantId,
+    })
+
+    <span style="color:#9ca3af">// GA4</span>
+    gtag(<span style="color:#a3e635">'event'</span>, <span style="color:#a3e635">'experiment_viewed'</span>, {
+      experiment_id: <span style="color:#a3e635">'hero-headline'</span>,
+      variant_id: variantId,
+    })
+  }}
+&gt;
+  ...
+&lt;/<span style="color:#C96A3F">Experiment</span>&gt;
 </pre>`
             }
           }
