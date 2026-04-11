@@ -18,17 +18,10 @@
   KORYLA_API_KEY = "sk_live_..."   # paste your key from Koryla dashboard → Settings → API Keys
   KORYLA_API_URL = "http://localhost:3000"
 
-# Edge function intercepts these paths before static files are served
+# Edge function intercepts all HTML page requests
 [[edge_functions]]
   function = "koryla"
-  path = "/"
-
-[[edge_functions]]
-  function = "koryla"
-  path = "/pricing"
-
-[[edge_functions]]
-  function = "koryla"
-  path = "/thank-you"
+  path = "/*"
+  excludedPath = "/assets/*"
 
 
