@@ -21,5 +21,11 @@ if (result?.isNewAssignment) {
     path: '/',
   })
 }
+
+// Render only the active named slot to avoid the dynamic slot[name] compiler error.
+// Astro.slots.render() accepts a static-evaluated string at runtime and returns HTML.
+const html = Astro.slots.has(active)
+  ? await Astro.slots.render(active)
+  : await Astro.slots.render('control')
 ---
-<slot name={active} />
+<Fragment set:html={html} />
