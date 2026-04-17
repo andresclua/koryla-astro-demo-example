@@ -2,7 +2,7 @@
 
 ## Architecture Overview
 
-Koryla is a server-side A/B testing system with two execution layers. Both layers share the same experiment configuration API and event pipeline, but run at different points in the request lifecycle.
+Koryla is a server-side A/B testing system with two execution layers. Both layers share the same experiment configuration API and event pipeline. Events are forwarded from Koryla to GA4 via the Measurement Protocol — server-side, never through the browser.
 
 ```
 Browser request
@@ -25,9 +25,16 @@ Browser request
       │
       ▼
   HTML delivered to browser
+      │
+      ▼
+┌─────────────────────────────────────────┐
+│  ANALYTICS PIPELINE                     │
+│  Koryla API → GA4 Measurement Protocol  │
+│  Server-side. Never reaches browser.    │
+└─────────────────────────────────────────┘
 ```
 
-Zero client-side JavaScript involved in variant selection or rendering at either layer.
+Zero client-side JavaScript is involved in variant selection, rendering, or analytics.
 
 ---
 
@@ -47,34 +54,26 @@ Netlify Edge Function running in Deno, configured to intercept all requests via 
 ### Request flow
 
 1. Read `cookie` header from incoming request
-2. Fetch experiment config from Koryla API (cached in-memory for 60 seconds)
+2. Fetch experiment config from Koryla API (in-memory cache, 60s TTL)
 3. Match request path against `base_url` of active experiments (sorted by path specificity, longest first)
 4. If no match → `context.next()`, pass through unchanged
 5. If match → determine variant:
    - Check for UTM rule match in query params (per-request, no sticky cookie)
    - Else read existing `ky_<experiment-id>` cookie
    - Else assign randomly by `traffic_weight`, set `isNewAssignment = true`
-6. Fire `impression` event to Koryla API (`await` — not fire-and-forget)
+6. Fire `impression` event to Koryla API (`await` — blocks until sent)
 7. Serve response:
    - Control variant → `context.next()` (same path)
    - Other variant → `context.rewrite(targetUrl)` (transparent URL rewrite)
 8. Append `Set-Cookie` headers on the mutable response if `isNewAssignment`
 
-### URL rewrite
-
-`context.rewrite()` serves a different Astro page while the browser sees the original URL. No redirect. No `history.pushState`. The variant page is rendered server-side and delivered as if it were the requested URL.
-
 ### Conversion detection
 
-On every request, before experiment routing, the edge function checks whether the requested path matches any experiment's `conversion_url`. If it does, it reads the variant cookie and fires a `conversion` event for every matching experiment. Multiple experiments can share the same conversion URL.
+Before experiment routing, the edge function loops through **all** experiments and checks whether the requested path matches any `conversion_url`. For each match where a variant cookie exists, a `conversion` event is fired. Multiple experiments can share the same conversion URL — all are checked.
 
 ---
 
 ## SDK Layer
-
-### Execution context
-
-Astro component (`Experiment.astro`) running inside the SSR render pipeline. Accesses `Astro.request`, `Astro.cookies`, and `Astro.slots`.
 
 ### Component interface
 
@@ -87,15 +86,15 @@ Astro component (`Experiment.astro`) running inside the SSR render pipeline. Acc
 
 ### Render flow
 
-1. `getVariant(Astro.request, id, { apiKey, apiUrl })` — reads config (60s cache), matches experiment by ID
-2. Variant assignment: UTM rule → existing cookie → random assignment
+1. `getVariant(Astro.request, id, { apiKey, apiUrl })` — fetches config (60s cache), matches by experiment ID
+2. Variant assignment: UTM rule → existing cookie → random weighted assignment
 3. If `isNewAssignment`: `Astro.cookies.set(cookieName, variantId, { maxAge: 30d, sameSite: 'lax', path: '/' })`
-4. Fire `impression` event (non-blocking fetch, `.catch(() => {})`)
-5. `Astro.slots.render(active)` — renders only the active named slot; the inactive variant is never included in the HTML response
+4. Fire `impression` event (non-blocking fetch)
+5. `Astro.slots.render(active)` — renders only the active slot; inactive variants are never included in the HTML
 
 ### Dynamic slot rendering
 
-Astro's compiler rejects `<slot name={variable} />`. The workaround is `Astro.slots.render(variantName)`, which accepts a dynamic string and returns rendered HTML injected via `<Fragment set:html={html} />`.
+Astro's compiler rejects `<slot name={variable} />`. The solution is `Astro.slots.render(variantName)`, which accepts a runtime string and returns rendered HTML injected via `<Fragment set:html={html} />`.
 
 ---
 
@@ -104,30 +103,25 @@ Astro's compiler rejects `<slot name={variable} />`. The workaround is `Astro.sl
 Both layers use the same algorithm:
 
 ```typescript
-// 1. UTM rule match (per-request, no sticky cookie)
+// 1. UTM rule match — per-request, never sets a sticky cookie
 const ruleMatch = findRuleMatch(variants, url.searchParams)
 if (ruleMatch) return { variantId: ruleMatch.id, isNewAssignment: false }
 
-// 2. Existing cookie
+// 2. Existing sticky cookie
 const stored = variants.find(v => v.id === cookieVariantId)
 if (stored) return { variantId: stored.id, isNewAssignment: false }
 
 // 3. Random weighted assignment
-const variantId = assignVariant(variants) // weighted by traffic_weight
-return { variantId, isNewAssignment: true }
+return { variantId: assignVariant(variants), isNewAssignment: true }
 ```
 
-`isNewAssignment: false` on UTM matches is intentional — UTM overrides are transient and must not overwrite the sticky cookie.
-
----
-
-## Session Tracking
-
-Both layers create and persist a `ky_session` UUID cookie (365-day expiry). This session ID is attached to every impression and conversion event, enabling funnel analysis across layers.
+`isNewAssignment: false` on UTM matches is intentional — UTM overrides are transient and must not overwrite the sticky assignment.
 
 ---
 
 ## Analytics Pipeline
+
+All events are sent from the Koryla API to GA4 via the Measurement Protocol. The `api_secret` is stored in Koryla — it never reaches the browser, cannot be scraped, and cannot be blocked.
 
 ```
 Edge/SDK layer
@@ -141,29 +135,35 @@ Koryla API  { experiment_id, variant_id, session_id, event_type, metadata }
             conversion → event_name: "experiment_converted"
 ```
 
-### Event metadata (enrichment)
+### GA4 setup
 
-Both layers attach request-derived metadata:
+In Koryla dashboard → **Settings → Analytics destinations → Google Analytics 4**:
+- `measurement_id`: your GA4 property ID (`G-XXXXXXXXXX`)
+- `api_secret`: GA4 → Admin → Data Streams → Measurement Protocol API secrets
 
-| Field | Source |
-|---|---|
-| `utm_source`, `utm_medium`, `utm_campaign` | URL query params |
-| `referrer` | `Referer` request header |
-| `page_url` | Request pathname |
-| `device_type` | User-Agent string (`mobile \| tablet \| desktop`) |
-| `country` | `context.geo.country` (edge layer only — Netlify-provided) |
+Once configured, all experiment events forward automatically. No code changes required.
 
-### Why server-side
+### Event metadata
 
-- `api_secret` never reaches the browser — cannot be scraped
-- Events bypass ad blockers and privacy extensions
-- Accurate data regardless of client JS execution
+| Field | Source | Layers |
+|---|---|---|
+| `utm_source`, `utm_medium`, `utm_campaign` | URL query params | Edge + SDK |
+| `referrer` | `Referer` request header | Edge + SDK |
+| `page_url` | Request pathname | Edge + SDK |
+| `device_type` | User-Agent (`mobile\|tablet\|desktop`) | Edge + SDK |
+| `country` | `context.geo.country` | Edge only (Netlify-provided) |
+
+---
+
+## Session Tracking
+
+Both layers read and write a `ky_session` UUID cookie (365-day expiry). This ID is attached to every event, enabling impression-to-conversion correlation in GA4 Explore.
 
 ---
 
 ## Config Cache
 
-Both layers cache the experiment config response from `/api/worker/config` in-memory for 60 seconds. Each Netlify edge function instance and SSR function instance maintains its own cache. Dashboard changes propagate within 60 seconds with no redeployment.
+Both layers cache `/api/worker/config` in-memory for 60 seconds. Each Netlify function instance maintains its own cache. Dashboard changes propagate within 60 seconds — no redeployment needed.
 
 ---
 
@@ -172,6 +172,6 @@ Both layers cache the experiment config response from `/api/worker/config` in-me
 | Cookie | Value | Expiry | Purpose |
 |---|---|---|---|
 | `ky_<experiment-id>` | variant UUID | 30 days | Sticky assignment per experiment |
-| `ky_session` | UUID v4 | 365 days | Session ID for event correlation |
+| `ky_session` | UUID v4 | 365 days | Session ID for GA4 event correlation |
 
-Both cookies use `Path=/; SameSite=Lax`. No `Domain` attribute (scoped to current host).
+Both cookies: `Path=/; SameSite=Lax`. No `Domain` attribute (scoped to current host).

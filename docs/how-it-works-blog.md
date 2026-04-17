@@ -1,50 +1,82 @@
-# We Moved Our A/B Tests to the Edge. Here's What Changed.
+# Your A/B Test Data in GA4 Is Probably Wrong
 
-Every A/B testing tool we evaluated worked the same way. JavaScript loads, the page renders, then the tool swaps the content. The "flicker problem" — that brief moment where the user sees the wrong version — was treated as an unavoidable cost of doing business.
-
-We decided it wasn't.
+Not because GA4 is broken. Because of how browser-based A/B testing tools work — and who they silently exclude.
 
 ---
 
-## The Flicker Problem Is an Architecture Problem
+## The Invisible Sample Problem
 
-The root cause of flicker is simple: browser-based testing tools make the variant decision *after* the page has already been rendered. The decision happens in JavaScript, which means the HTML has already arrived in the browser, the user has already seen it, and now something needs to change.
+Every popular A/B testing tool works the same way. A JavaScript snippet loads in the browser, the page renders, and then the tool swaps in the variant. It happens fast. But it depends on JavaScript running successfully.
 
-No matter how fast the JavaScript runs, there will always be a gap between "page rendered" and "correct variant shown." On fast connections, it's a millisecond. On slow connections, it's enough for the user to notice.
+Ad blockers, privacy extensions, and tracking prevention settings can block these scripts. When they do, those visitors are excluded from your experiment silently — no error, no warning. They just aren't counted.
 
-The only real fix is to move the decision earlier — before the HTML is generated at all.
+In most B2B and developer-focused audiences, 20–40% of visitors use some form of ad blocking. These users tend to be more technically sophisticated, more privacy-aware, and in our experience, higher-intent. They are exactly the visitors you want in your data.
+
+When they're excluded from your experiment, your conversion rates in GA4 reflect a skewed sample. You ship the wrong variant and call it a win.
 
 ---
 
-## Moving the Decision to the Edge
+## The Flicker Problem Makes It Worse
 
-With Koryla, the variant decision happens at the **network edge**, before the request even reaches the application server.
+Even when the JavaScript runs successfully, there is another issue: flicker.
 
-When a visitor lands on `/pricing`, a Netlify edge function intercepts the request, reads their variant cookie (or assigns one), and transparently rewrites the URL to `/pricing-b` if they're in the variant group. The browser receives a 200 response with the correct HTML. It never sees `/pricing-b` in the address bar. There is no redirect. There is no JavaScript swap. There is no flicker.
+The variant decision happens after the page has already rendered. The HTML arrives in the browser, the user sees it, and then JavaScript swaps the content to show the correct variant. On fast connections, the gap is milliseconds. On slow connections, the user sees a visible flash of the wrong version.
+
+Flicker is not just a UX annoyance. It means there are visitors who saw both versions in the same session. It means your impression data includes people who registered a partial view of the control before being shown the variant. It introduces noise you cannot remove.
+
+---
+
+## Moving the Decision Server-Side
+
+The fix for both problems is the same: make the variant decision before the HTML is generated.
+
+With Koryla, variant assignment happens at the **network edge** — in a Netlify edge function that runs before Astro processes the request. By the time the first byte of HTML leaves the server, the correct version is already chosen.
 
 ```
 Visitor requests /pricing
         │
         ▼
-  Edge function runs (Deno, before Astro)
-  → Reads cookie: variant = B
-  → Rewrites request to /pricing-b
+  Edge function assigns variant
+  → Reads or sets ky_<experiment-id> cookie
+  → Rewrites request to /pricing-b if needed
         │
         ▼
-  Astro renders /pricing-b
+  Astro renders the correct page
         │
         ▼
-  Browser receives correct HTML for variant B
-  (URL still shows /pricing)
+  Browser receives final HTML
+  (no JavaScript swap, no flicker)
 ```
 
-The entire variant decision takes place before the first byte of HTML is generated.
+There is nothing in the browser to block. The decision happens in Deno, at the edge, before the user's browser is involved at all.
 
 ---
 
-## For Component-Level Tests: The SDK Layer
+## GA4 Is Still Your Analytics Tool
 
-Not every test requires a separate page. For testing a headline, a CTA, or a hero section, Koryla's SDK layer runs inside the Astro server during render. The `<Experiment>` component renders only the active slot — the other variant is never included in the HTML response.
+This is the part worth emphasizing: Koryla does not replace GA4.
+
+Experiment events — impressions and conversions — are forwarded from Koryla to GA4 via the Measurement Protocol, server-side. They show up in your GA4 property as `experiment_assigned` and `experiment_converted`. You analyze them in Explore, build audiences around them, connect them to your existing funnels.
+
+The GA4 Measurement Protocol API secret lives in Koryla. It never reaches the browser. It cannot be scraped or blocked.
+
+Your team keeps working in GA4. Your reports, audiences, and dashboards stay intact. What changes is the quality of the data coming in.
+
+---
+
+## What We Saw After Switching
+
+After moving our experiments server-side, the numbers looked different.
+
+Conversion rates changed — not uniformly up or down, but differently across variants. The previous results had been based on a sample that excluded ad-block users. Some variants that had looked like clear winners were driven by a subset of the audience. Others that looked weak turned out to perform consistently across the full audience.
+
+We had not changed the experiments. We had changed who was in them.
+
+---
+
+## The Component-Level Case
+
+Not every test needs a separate page. For testing a headline or a CTA, Koryla's SDK layer renders only the active variant during server-side rendering. The inactive variant is never included in the HTML.
 
 ```astro
 <Experiment id="your-experiment-uuid">
@@ -57,48 +89,24 @@ Not every test requires a separate page. For testing a headline, a CTA, or a her
 </Experiment>
 ```
 
-No JavaScript. The variant the visitor sees is baked directly into the HTML that lands in their browser.
+The variant the user sees is in the HTML that arrives in their browser. Not swapped in afterward. Not dependent on JavaScript executing.
 
 ---
 
-## The Ad Blocker Problem
+## The Tradeoff
 
-There's a second issue with browser-based testing that gets less attention: ad blockers.
+Server-side testing requires SSR. If your site is fully static, you cannot make per-request decisions — there is no server running on each request. You need an SSR framework like Astro with a hosting platform that supports edge functions.
 
-Most popular A/B testing tools inject a JavaScript snippet that ad blockers and privacy extensions recognize and block. When that happens, the visitor either sees no variant (you lose the data point) or the tool falls back to a default (you get inaccurate data).
+If you already have that setup, the integration is straightforward: one environment variable, one edge function file, one line in `netlify.toml`.
 
-With Koryla, variant assignment happens server-side. There is nothing in the browser to block. Ad blockers and privacy extensions are irrelevant. You get accurate data on every visitor, including the privacy-conscious ones.
-
-The same applies to analytics. Koryla forwards experiment events — impressions and conversions — to GA4 via the Measurement Protocol, server-side. The GA4 Measurement Protocol API secret never reaches the browser. No browser extension can intercept it.
+The question is whether the data quality improvement is worth the setup. In our experience, once you see conversion data that includes your full audience — not just the visitors whose JavaScript ran cleanly — there is no going back to the alternative.
 
 ---
 
-## What Accurate Data Actually Looks Like
+## The Short Version
 
-After switching, we noticed something immediately: our conversion rates looked different.
+Browser-based A/B testing tools silently exclude ad-block users and introduce flicker that skews conversion rates. Both problems corrupt your GA4 experiment data in ways that are invisible until you compare them to server-side results.
 
-Not necessarily better or worse — different. The previous numbers had been skewed by the visitors who were silently excluded because their ad blocker blocked the testing script. Those visitors tended to be more technical, more privacy-aware, and in our case, higher-intent. They were systematically excluded from our experiments.
+Moving variant assignment to the edge means every visitor is included, there is no flicker, and GA4 receives clean data via the Measurement Protocol — server-side, un-blockable, accurate.
 
-With server-side testing, everyone is included. The data reflects your actual audience.
-
----
-
-## The Setup
-
-Koryla runs as a Netlify edge function alongside an Astro SSR project. The edge function intercepts all requests, matches them against active experiments from the Koryla API (cached 60 seconds), and handles routing transparently. For SDK experiments, a single `<Experiment>` component wraps the variants.
-
-Setup is a Netlify environment variable, a `netlify.toml` entry, and `output: 'server'` in your Astro config. The edge function is self-contained — no external SDK to install, no CDN to load.
-
-Changes to experiments — traffic weights, new UTM rules, pausing a test — propagate in under a minute without redeployment.
-
----
-
-## What We Learned
-
-Moving A/B testing server-side is not a minor optimization. It changes the architecture of the experiment in a fundamental way.
-
-The flicker problem disappears because there is no longer a moment where the browser has the wrong content. The ad blocker problem disappears because there is no client-side script to block. The performance cost disappears because there is no JavaScript payload added to the page.
-
-The tradeoff is that you need an SSR setup. Static sites cannot do this — the server needs to run code on each request to make the variant decision. But if you are already on an SSR framework like Astro, the integration is straightforward.
-
-The question we kept coming back to: if you can make the decision before the HTML is generated, why would you make it after?
+You keep your existing analytics setup. You just start trusting the numbers.
