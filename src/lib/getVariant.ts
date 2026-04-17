@@ -1,18 +1,8 @@
-/**
- * Inline implementation of @koryla/astro getVariant() helper.
- *
- * In a real project you'd install the package:
- *   npm install @koryla/astro
- *   import { getVariant } from '@koryla/astro'
- *
- * This file mirrors exactly what @koryla/astro does internally,
- * so the astro-demo works as a self-contained standalone repo.
- */
-
 const COOKIE_PREFIX = 'ky_'
 const CACHE_TTL = 60_000
 
-interface Variant { id: string; name: string; traffic_weight: number; target_url: string; is_control: boolean }
+interface Rule { param: string; value: string }
+interface Variant { id: string; name: string; traffic_weight: number; target_url: string; is_control: boolean; rules?: Rule[] }
 interface Experiment { id: string; name: string; base_url: string; conversion_url?: string; variants: Variant[] }
 export interface VariantResult {
   experiment: Experiment
@@ -22,7 +12,6 @@ export interface VariantResult {
   cookieName: string
 }
 
-// Module-level cache (persists across requests during server lifetime)
 const cache: { experiments: Experiment[]; cachedAt: number } = { experiments: [], cachedAt: 0 }
 
 async function fetchConfig(apiKey: string, apiUrl: string): Promise<Experiment[]> {
@@ -53,6 +42,16 @@ function assignVariant(variants: Pick<Variant, 'id' | 'traffic_weight'>[]): stri
   return variants[variants.length - 1].id
 }
 
+function findRuleMatch(variants: Variant[], searchParams: URLSearchParams): Variant | null {
+  for (const v of variants) {
+    if (!v.rules?.length) continue
+    for (const rule of v.rules) {
+      if (searchParams.get(rule.param) === rule.value) return v
+    }
+  }
+  return null
+}
+
 export async function getVariant(
   request: Request,
   experimentId: string,
@@ -62,15 +61,26 @@ export async function getVariant(
   const experiment = experiments.find(e => e.id === experimentId)
   if (!experiment || !experiment.variants.length) return null
 
+  const url = new URL(request.url)
   const cookies = parseCookies(request.headers.get('cookie') ?? '')
   const cookieName = `${COOKIE_PREFIX}${experimentId}`
-  let variantId = cookies[cookieName]
+  const cookieVariantId = cookies[cookieName]
+  let variantId: string
   let isNewAssignment = false
 
-  const stored = variantId ? experiment.variants.find(v => v.id === variantId) : null
-  if (!stored) {
-    variantId = assignVariant(experiment.variants)
-    isNewAssignment = true
+  // UTM/query param rules take priority over cookie
+  const ruleMatch = findRuleMatch(experiment.variants, url.searchParams)
+  if (ruleMatch) {
+    variantId = ruleMatch.id
+    isNewAssignment = variantId !== cookieVariantId
+  } else {
+    const stored = cookieVariantId ? experiment.variants.find(v => v.id === cookieVariantId) : null
+    if (stored) {
+      variantId = stored.id
+    } else {
+      variantId = assignVariant(experiment.variants)
+      isNewAssignment = true
+    }
   }
 
   const variant = experiment.variants.find(v => v.id === variantId)!
