@@ -1,40 +1,46 @@
 ---
 import Layout from '../layouts/Layout.astro'
-const GH = 'https://github.com/andresclua/koryla-astro-demo-example/blob/main'
+import DemoHeader from '../components/demo/DemoHeader.astro'
+import CodeDiagram from '../components/demo/CodeDiagram.astro'
 ---
+
+<!--
+  CONTROL variant of the edge experiment.
+  The Netlify edge function ran BEFORE this page rendered:
+  it assigned this visitor to "control" and called context.next() — no rewrite.
+  The browser always sees /demo-edge regardless of which variant was assigned.
+-->
 <Layout title="Demo Edge" variant="control — /demo-edge">
-  <main style="max-width:900px;margin:0 auto;padding:80px 40px;text-align:center">
+  <main class="page">
 
-    <div style="display:inline-block;background:#FEF0E8;color:#C96A3F;font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:16px">
-      EDGE EXPERIMENT · CONTROL
-    </div>
+    <DemoHeader
+      type="EDGE"
+      badge="EDGE EXPERIMENT · CONTROL"
+      title="You're seeing the control variant"
+      description='The Netlify edge function assigned you to <strong>control</strong>. The browser always sees <code>/demo-edge</code> — no redirect happened.'
+    />
 
-    <h1 style="font-size:clamp(36px,5vw,60px);font-weight:800;line-height:1.1;letter-spacing:-2px;margin-bottom:16px;color:#0F2235">
-      You're seeing the<br/>control variant
-    </h1>
-    <p style="font-size:17px;color:#6b7280;max-width:560px;margin:0 auto 40px;line-height:1.6">
-      The Netlify edge function assigned you to <strong>control</strong>. The browser always sees <code>/demo-edge</code> — no redirect happened.
-    </p>
+    <!-- Control CTA — 50% of visitors land here -->
+    <a href="/thank-you" class="btn">Get started free →</a>
 
-    <a href="/thank-you" style="display:inline-block;background:#C96A3F;color:#fff;padding:16px 40px;border-radius:14px;font-weight:700;font-size:17px;text-decoration:none">
-      Get started free →
+    <CodeDiagram lines={[
+      { color: 'comment', text: '// What the edge function did for YOU' },
+      { color: 'edge',    text: 'Request: GET /demo-edge' },
+      { color: 'edge',    text: 'Edge: no cookie → random assignment → <span style="color:#86efac">control (50%)</span>' },
+      { color: 'edge',    text: 'Edge: target path === request path → context.next() (no rewrite)' },
+      { color: 'edge',    text: 'Edge: Set-Cookie ky_&lt;id&gt;=&lt;control-uuid&gt;' },
+      { color: 'comment', text: '// 50% of visitors get /demo-edge-b instead (same browser URL)' },
+    ]} />
+
+    <a href="https://github.com/andresclua/koryla-astro-demo-example/blob/main/src/pages/demo-edge.astro" target="_blank" class="link-btn">
+      View demo-edge.astro on GitHub →
     </a>
 
-    <div style="margin-top:48px;background:#0F2235;border-radius:16px;padding:28px;text-align:left;color:#e2e8f0;font-size:13px;font-family:monospace;line-height:2">
-      <span style="color:#94a3b8">// What the edge function did for YOU</span><br/>
-      <span style="color:#f59e0b">Request</span>: GET /demo-edge<br/>
-      <span style="color:#f59e0b">Edge</span>: cookie? no → random assignment → <span style="color:#86efac">control (50%)</span><br/>
-      <span style="color:#f59e0b">Edge</span>: isSamePath → context.next() (no rewrite)<br/>
-      <span style="color:#f59e0b">Edge</span>: Set-Cookie ky_&lt;id&gt;=&lt;control-uuid&gt;<br/>
-      <span style="color:#f59e0b">Browser</span>: receives /demo-edge content ✓<br/>
-      <br/>
-      <span style="color:#94a3b8">// 50% of users get /demo-edge-b instead (rewritten, same browser URL)</span>
-    </div>
-
-    <div style="margin-top:24px">
-      <a href={GH + '/src/pages/demo-edge.astro'} target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#C96A3F;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none">
-        View demo-edge.astro on GitHub →
-      </a>
-    </div>
   </main>
 </Layout>
+
+<style>
+  .page { max-width: 900px; margin: 0 auto; padding: 80px 40px; text-align: center; display: flex; flex-direction: column; gap: 32px; align-items: center; }
+  .btn { display: inline-block; background: #C96A3F; color: #fff; padding: 16px 40px; border-radius: 14px; font-weight: 700; font-size: 17px; text-decoration: none; }
+  .link-btn { display: inline-flex; align-items: center; gap: 6px; background: #C96A3F; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; }
+</style>

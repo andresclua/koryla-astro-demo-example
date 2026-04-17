@@ -30,29 +30,58 @@ const { title, variant = 'control' } = Astro.props
   <slot name="head" />
 </head>
 <body>
-  <!-- Debug badge — makes it obvious which variant you're seeing -->
+
+  <!-- Debug badge — shows which variant is active for the current request -->
   {variant && (
-    <div style="position:fixed;bottom:16px;right:16px;z-index:999;background:#0F2235;color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:999px;letter-spacing:.5px;opacity:.9">
-      Koryla · {variant}
-    </div>
+    <div class="variant-badge">Koryla · {variant}</div>
   )}
 
-  <nav style="border-bottom:1px solid #e5e7eb;padding:0 40px;height:60px;display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;width:100%">
-    <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none">
-      <span style="font-weight:700;font-size:16px;color:#0F2235">Koryla</span>
-      <span style="color:#e5e7eb">·</span>
-      <span style="font-size:14px;color:#9ca3af;font-weight:500">Astro Demo</span>
+  <nav class="nav">
+    <a href="/" class="nav__brand">
+      <span class="nav__brand-name">Koryla</span>
+      <span class="nav__brand-sep">·</span>
+      <span class="nav__brand-sub">Astro Demo</span>
     </a>
-    <div style="display:flex;gap:24px;font-size:14px;color:#6b7280;align-items:center">
+    <div class="nav__links">
       <a href="/pricing">Pricing</a>
-      <a href="/hero" style="color:#C96A3F;font-weight:600">Layout demo</a>
-      <a href="/demo-sdk" style="color:#6366f1;font-weight:600">SDK</a>
-      <a href="/demo-edge" style="color:#C96A3F;font-weight:600">Edge</a>
-      <a href="/demo-combined" style="color:#059669;font-weight:600">Combined</a>
-      <a href="/thank-you" style="background:#C96A3F;color:#fff;padding:8px 18px;border-radius:8px;font-weight:600">Get started</a>
+      <a href="/hero"          class="nav__link--orange">Layout demo</a>
+      <a href="/demo-sdk"      class="nav__link--indigo">SDK</a>
+      <a href="/demo-edge"     class="nav__link--orange">Edge</a>
+      <a href="/demo-combined" class="nav__link--green">Combined</a>
+      <a href="/thank-you"     class="nav__cta">Get started</a>
     </div>
   </nav>
 
   <slot />
+
 </body>
 </html>
+
+<style>
+  .variant-badge {
+    position: fixed; bottom: 16px; right: 16px; z-index: 999;
+    background: #0F2235; color: #fff;
+    font-size: 11px; font-weight: 600; padding: 6px 12px;
+    border-radius: 999px; letter-spacing: .5px; opacity: .9;
+  }
+
+  .nav {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0 40px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 1200px; margin: 0 auto; width: 100%;
+  }
+
+  .nav__brand { display: flex; align-items: center; gap: 8px; }
+  .nav__brand-name { font-weight: 700; font-size: 16px; color: #0F2235; }
+  .nav__brand-sep  { color: #e5e7eb; }
+  .nav__brand-sub  { font-size: 14px; color: #9ca3af; font-weight: 500; }
+
+  .nav__links { display: flex; gap: 24px; font-size: 14px; color: #6b7280; align-items: center; }
+
+  .nav__link--orange { color: #C96A3F; font-weight: 600; }
+  .nav__link--indigo { color: #6366f1; font-weight: 600; }
+  .nav__link--green  { color: #059669; font-weight: 600; }
+
+  .nav__cta { background: #C96A3F; color: #fff; padding: 8px 18px; border-radius: 8px; font-weight: 600; }
+</style>

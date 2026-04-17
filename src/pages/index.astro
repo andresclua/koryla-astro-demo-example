@@ -1,98 +1,125 @@
 ---
 import Layout from '../layouts/Layout.astro'
 
-const demos = [
+// Existing demos (edge-only experiments)
+const edgeDemos = [
   {
-    href: '/hero',
-    number: '01',
-    type: 'Layout change',
+    href: '/hero', number: '01', type: 'Layout change',
     title: 'Homepage Hero Test',
     description: 'Two completely different hero layouts behind the same URL. The Netlify edge function rewrites /hero → /hero-b transparently. No JavaScript required.',
     what: ['Control: Centered single-column layout', 'Variant B: Two-column with feature cards'],
-    color: '#C96A3F',
-    bg: '#FEF0E8',
+    color: '#C96A3F', bg: '#FEF0E8',
   },
   {
-    href: '/pricing',
-    number: '02',
-    type: 'Page change',
+    href: '/pricing', number: '02', type: 'Page change',
     title: 'Pricing Page Layout',
     description: 'Two entirely separate pricing pages at different URLs. The edge function intercepts /pricing and sends half the traffic to /pricing-b — a completely different pricing structure.',
     what: ['Control: 3-tier pricing (Hobby / Pro / Enterprise)', 'Variant B: 2-tier with annual billing toggle'],
-    color: '#0F2235',
-    bg: '#F5EDE0',
+    color: '#0F2235', bg: '#F5EDE0',
   },
 ]
+
+// New demos showing SDK, Edge, and Combined patterns
+const newDemos = [
+  { href: '/demo-sdk',      label: 'SDK',       title: 'Demo SDK — UTM Text',  desc: 'Misma URL, CTA distinto según ?utm_text=',      color: '#6366f1', border: '#c7d2fe', bg: '#f8faff' },
+  { href: '/demo-edge',     label: 'Edge',      title: 'Demo Edge — Layout',   desc: 'URL rewrite transparente entre 2 páginas',       color: '#C96A3F', border: '#fde8d8', bg: '#fff8f5' },
+  { href: '/demo-combined', label: 'Edge + SDK', title: 'Demo Combined',        desc: 'Edge para layout, SDK para componente fino',     color: '#059669', border: '#bbf7d0', bg: '#f0fdf4' },
+]
 ---
+
 <Layout title="Astro Demo" variant="">
-  <main style="max-width:860px;margin:0 auto;padding:80px 40px">
-    <div style="margin-bottom:48px">
-      <div style="display:inline-block;background:#FEF0E8;color:#C96A3F;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;margin-bottom:24px;letter-spacing:.3px">
-        LIVE DEMO · ASTRO EDGE FUNCTIONS
-      </div>
-      <h1 style="font-size:clamp(32px,5vw,52px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:16px;color:#0F2235">
-        Two ways to A/B test<br/>with Astro edge functions
-      </h1>
-      <p style="font-size:17px;color:#6b7280;max-width:520px;line-height:1.6;margin-bottom:16px">
-        Each experiment below is live — powered by a <code style="background:#F5EDE0;padding:2px 6px;border-radius:4px;font-size:13px">Netlify Edge Function</code> that intercepts requests before any HTML is sent. Zero flicker, zero JS overhead.
+  <main class="page">
+
+    <!-- Page header -->
+    <header class="header">
+      <span class="badge">LIVE DEMO · ASTRO EDGE FUNCTIONS</span>
+      <h1>Two ways to A/B test<br/>with Astro edge functions</h1>
+      <p class="subtitle">
+        Each experiment below is live — powered by a <code>Netlify Edge Function</code> that
+        intercepts requests before any HTML is sent. Zero flicker, zero JS overhead.
       </p>
-      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#9ca3af">
-        <span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>
+      <div class="status">
+        <span class="status__dot"></span>
         Edge function active on /hero · /pricing
       </div>
-    </div>
+    </header>
 
-    <div style="display:flex;flex-direction:column;gap:16px">
-      {demos.map((demo) => (
-        <a href={demo.href} style="display:block;background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:24px;text-decoration:none;transition:box-shadow .15s">
-          <div style="display:flex;align-items:flex-start;gap:16px">
-            <div style={`flex-shrink:0;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;background:${demo.bg};color:${demo.color}`}>
-              {demo.number}
-            </div>
-            <div style="flex:1">
-              <div style="margin-bottom:6px">
-                <span style={`font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:${demo.bg};color:${demo.color};letter-spacing:.3px`}>{demo.type.toUpperCase()}</span>
-              </div>
-              <h2 style="font-size:16px;font-weight:700;color:#0F2235;margin-bottom:4px">{demo.title}</h2>
-              <p style="font-size:14px;color:#6b7280;line-height:1.5;margin-bottom:12px">{demo.description}</p>
-              <ul style="list-style:none;display:flex;flex-direction:column;gap:4px">
-                {demo.what.map((w, i) => (
-                  <li style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#6b7280">
-                    <span style={`margin-top:5px;width:6px;height:6px;border-radius:50%;flex-shrink:0;background:${i === 0 ? '#d1d5db' : demo.color}`}></span>
-                    {w}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <span style="color:#d1d5db;font-size:18px;flex-shrink:0">→</span>
+    <!-- Existing edge experiments -->
+    <div class="demo-list">
+      {edgeDemos.map((demo) => (
+        <a href={demo.href} class="demo-card">
+          <div class="demo-card__num" style={`background:${demo.bg};color:${demo.color}`}>{demo.number}</div>
+          <div class="demo-card__body">
+            <span class="demo-card__type" style={`background:${demo.bg};color:${demo.color}`}>{demo.type.toUpperCase()}</span>
+            <h2 class="demo-card__title">{demo.title}</h2>
+            <p class="demo-card__desc">{demo.description}</p>
+            <ul class="demo-card__variants">
+              {demo.what.map((w, i) => (
+                <li>
+                  <span class="dot" style={i === 0 ? undefined : `background:${demo.color}`}></span>
+                  {w}
+                </li>
+              ))}
+            </ul>
           </div>
+          <span class="demo-card__arrow">→</span>
         </a>
       ))}
     </div>
 
-    <div style="margin-top:40px">
-      <div style="font-size:13px;font-weight:700;color:#0F2235;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">New Demos</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px">
-        <a href="/demo-sdk" style="display:block;border:1px solid #c7d2fe;background:#f8faff;border-radius:14px;padding:20px;text-decoration:none;color:inherit">
-          <div style="font-size:11px;font-weight:700;color:#6366f1;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">SDK</div>
-          <div style="font-weight:700;color:#0F2235;margin-bottom:4px">Demo SDK — UTM Text</div>
-          <div style="font-size:13px;color:#6b7280">Misma URL, CTA distinto según ?utm_text=</div>
-        </a>
-        <a href="/demo-edge" style="display:block;border:1px solid #fde8d8;background:#fff8f5;border-radius:14px;padding:20px;text-decoration:none;color:inherit">
-          <div style="font-size:11px;font-weight:700;color:#C96A3F;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Edge</div>
-          <div style="font-weight:700;color:#0F2235;margin-bottom:4px">Demo Edge — Layout</div>
-          <div style="font-size:13px;color:#6b7280">URL rewrite transparente entre 2 páginas</div>
-        </a>
-        <a href="/demo-combined" style="display:block;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:14px;padding:20px;text-decoration:none;color:inherit">
-          <div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Edge + SDK</div>
-          <div style="font-weight:700;color:#0F2235;margin-bottom:4px">Demo Combined</div>
-          <div style="font-size:13px;color:#6b7280">Edge para layout, SDK para componente fino</div>
-        </a>
+    <!-- New demos: SDK / Edge / Combined -->
+    <section class="new-demos">
+      <p class="new-demos__label">New Demos</p>
+      <div class="new-demos__grid">
+        {newDemos.map((d) => (
+          <a href={d.href} class="new-card" style={`border-color:${d.border};background:${d.bg}`}>
+            <span class="new-card__label" style={`color:${d.color}`}>{d.label}</span>
+            <p class="new-card__title">{d.title}</p>
+            <p class="new-card__desc">{d.desc}</p>
+          </a>
+        ))}
       </div>
-    </div>
+    </section>
 
-    <p style="margin-top:40px;font-size:12px;text-align:center;color:#9ca3af">
-      Clear your cookies to be re-assigned. Each experiment uses a <code style="background:#F5EDE0;padding:1px 5px;border-radius:4px">ky_</code> cookie to keep you on the same variant.
+    <p class="footnote">
+      Clear your cookies to be re-assigned. Each experiment uses a <code>ky_</code> cookie to keep you on the same variant.
     </p>
+
   </main>
 </Layout>
+
+<style>
+  .page { max-width: 860px; margin: 0 auto; padding: 80px 40px; }
+
+  /* Header */
+  .header { margin-bottom: 48px; }
+  .badge { display: inline-block; background: #FEF0E8; color: #C96A3F; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 999px; margin-bottom: 24px; letter-spacing: .3px; }
+  h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 16px; color: #0F2235; }
+  .subtitle { font-size: 17px; color: #6b7280; max-width: 520px; line-height: 1.6; margin-bottom: 16px; }
+  .status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #9ca3af; }
+  .status__dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block; }
+
+  /* Edge demo cards */
+  .demo-list { display: flex; flex-direction: column; gap: 16px; }
+  .demo-card { display: flex; align-items: flex-start; gap: 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; padding: 24px; text-decoration: none; }
+  .demo-card__num { flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+  .demo-card__body { flex: 1; }
+  .demo-card__type { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: .3px; }
+  .demo-card__title { font-size: 16px; font-weight: 700; color: #0F2235; margin: 6px 0 4px; }
+  .demo-card__desc { font-size: 14px; color: #6b7280; line-height: 1.5; margin-bottom: 12px; }
+  .demo-card__variants { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  .demo-card__variants li { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #6b7280; }
+  .dot { margin-top: 5px; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: #d1d5db; }
+  .demo-card__arrow { color: #d1d5db; font-size: 18px; flex-shrink: 0; }
+
+  /* New demos grid */
+  .new-demos { margin-top: 40px; }
+  .new-demos__label { font-size: 13px; font-weight: 700; color: #0F2235; margin-bottom: 24px; text-transform: uppercase; letter-spacing: .5px; }
+  .new-demos__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .new-card { display: block; border: 1px solid; border-radius: 14px; padding: 20px; text-decoration: none; color: inherit; }
+  .new-card__label { font-size: 11px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; display: block; }
+  .new-card__title { font-weight: 700; color: #0F2235; margin-bottom: 4px; }
+  .new-card__desc { font-size: 13px; color: #6b7280; }
+
+  .footnote { margin-top: 40px; font-size: 12px; text-align: center; color: #9ca3af; }
+</style>

@@ -1,0 +1,31 @@
+---
+interface Line {
+  color?: 'edge' | 'sdk' | 'comment'
+  text: string
+}
+interface Props {
+  lines: Line[]
+}
+const { lines } = Astro.props
+
+const colorMap = { edge: '#f59e0b', sdk: '#6366f1', comment: '#94a3b8' }
+---
+
+<div class="diagram">
+  {lines.map(({ color, text }) => (
+    <div style={color ? `color:${colorMap[color]}` : undefined} set:html={text} />
+  ))}
+</div>
+
+<style>
+  .diagram {
+    background: #0F2235;
+    border-radius: 16px;
+    padding: 28px;
+    font-size: 13px;
+    font-family: monospace;
+    line-height: 2;
+    color: #e2e8f0;
+    text-align: left;
+  }
+</style>

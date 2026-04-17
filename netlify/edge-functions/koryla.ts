@@ -95,9 +95,9 @@ function createSplitEngine(options: { apiKey: string; apiUrl: string }) {
     let isNewAssignment = false
 
     const ruleMatch = findRuleMatch(experiment.variants, url.searchParams)
-    if (ruleMatch && ruleMatch.id !== variantId) {
+    if (ruleMatch) {
       variantId = ruleMatch.id
-      isNewAssignment = true
+      isNewAssignment = false  // rule match never sets a sticky cookie
     } else if (!variantId || !experiment.variants.find(v => v.id === variantId)) {
       variantId = assignVariant(experiment.variants)
       isNewAssignment = true

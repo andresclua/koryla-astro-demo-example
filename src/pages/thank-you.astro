@@ -1,24 +1,36 @@
 ---
 import Layout from '../layouts/Layout.astro'
 ---
+
+<!-- Conversion page — Koryla records a conversion event when a visitor reaches this URL -->
 <Layout title="Thank you" variant="conversion page">
-  <main style="max-width:600px;margin:0 auto;padding:120px 40px;text-align:center">
+  <main class="page">
 
-    <div style="width:64px;height:64px;background:#FEF0E8;border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:32px">
-      ✓
-    </div>
+    <div class="icon">✓</div>
 
-    <h1 style="font-size:36px;font-weight:800;letter-spacing:-1px;margin-bottom:12px;color:#0F2235">You're in!</h1>
-    <p style="color:#6b7280;font-size:17px;line-height:1.6;margin-bottom:40px">
-      Thanks for signing up. Check your inbox for your magic link.
-    </p>
+    <h1>You're in!</h1>
 
-    <a href="/" style="display:inline-block;background:#C96A3F;color:#fff;padding:12px 28px;border-radius:12px;font-weight:600;font-size:15px">
-      ← Back to homepage
-    </a>
+    <p class="subtitle">Thanks for signing up. Check your inbox for your magic link.</p>
 
-    <p style="color:#d1d5db;font-size:12px;margin-top:48px">
+    <a href="/" class="btn">← Back to homepage</a>
+
+    <p class="footnote">
       This is the <strong>conversion page</strong> — Koryla records a conversion event when a user reaches this URL.
     </p>
+
   </main>
 </Layout>
+
+<style>
+  .page { max-width: 600px; margin: 0 auto; padding: 120px 40px; text-align: center; }
+
+  .icon { width: 64px; height: 64px; background: #FEF0E8; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 32px; }
+
+  h1 { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px; color: #0F2235; }
+
+  .subtitle { color: #6b7280; font-size: 17px; line-height: 1.6; margin-bottom: 40px; }
+
+  .btn { display: inline-block; background: #C96A3F; color: #fff; padding: 12px 28px; border-radius: 12px; font-weight: 600; font-size: 15px; text-decoration: none; }
+
+  .footnote { color: #d1d5db; font-size: 12px; margin-top: 48px; }
+</style>

@@ -1,70 +1,77 @@
 ---
 import Layout from '../layouts/Layout.astro'
+
 const GH = 'https://github.com/andresclua/koryla-astro-demo-example/blob/main'
+
+// Feature cards shown in the right column
+const features = [
+  { icon: '⚡', title: 'Zero flicker',  desc: "Variants are served before the browser renders anything." },
+  { icon: '🔒', title: 'No client JS',  desc: "Works entirely server-side — ad blockers can't interfere." },
+  { icon: '📊', title: 'Live results',  desc: "See impressions and conversions in your dashboard in real time." },
+  { icon: '🔌', title: 'Any stack',     desc: "Next.js, Astro, WordPress, Nuxt — one API key, any platform." },
+]
 ---
+
+<!--
+  VARIANT B: two-column layout with feature cards.
+  Reached via edge rewrite from /hero → /hero-b.
+  The interactive tour button explains each change vs. the control.
+-->
 <Layout title="Homepage Hero" variant="variant-b — /hero-b">
+
+  <!-- Driver.js styles — needed for the interactive tour -->
   <link slot="head" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css" />
   <style slot="head">
     @keyframes koryla-glow {
       0%, 100% { box-shadow: 0 0 12px 2px rgba(201,106,63,0.5); }
       50%       { box-shadow: 0 0 24px 6px rgba(201,106,63,0.9); }
     }
-    #tour-trigger {
-      animation: koryla-glow 2s ease-in-out infinite;
-    }
-    #tour-trigger:hover {
-      background: #FEF0E8 !important;
-      color: #C96A3F !important;
-      border-color: #C96A3F !important;
-    }
+    #tour-trigger { animation: koryla-glow 2s ease-in-out infinite; }
+    #tour-trigger:hover { background: #FEF0E8 !important; color: #C96A3F !important; border-color: #C96A3F !important; }
   </style>
 
-  <main style="max-width:1100px;margin:0 auto;padding:80px 40px">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center">
+  <main class="page">
+    <div class="grid">
+
+      <!-- Left column: headline, CTA -->
       <div>
-        <div id="tour-badge" style="display:inline-flex;align-items:center;gap:8px;background:#FEF0E8;color:#C96A3F;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;margin-bottom:24px">
-          <span style="width:6px;height:6px;background:#C96A3F;border-radius:50%;display:inline-block"></span>
+        <div id="tour-badge" class="badge">
+          <span class="badge__dot"></span>
           TRUSTED BY 1,200 TEAMS · NO CREDIT CARD NEEDED
         </div>
 
-        <h1 id="tour-headline" style="font-size:clamp(36px,4vw,56px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px;color:#0F2235">
+        <h1 id="tour-headline">
           Your next best decision<br/>
-          <span style="color:#C96A3F">is one test away.</span>
+          <span class="accent">is one test away.</span>
         </h1>
 
-        <p style="font-size:17px;color:#4b5563;line-height:1.65;margin-bottom:32px">
+        <p class="subtitle">
           Run your first A/B test in under 5 minutes — no code changes,
           no flicker, no developer bottleneck. Just results.
         </p>
 
-        <a id="tour-cta" href="/thank-you" style="display:inline-block;background:#0F2235;color:#fff;padding:12px 24px;border-radius:10px;font-weight:600;font-size:14px;text-decoration:none">
-          Start free today
-        </a>
-        <p style="font-size:12px;color:#9ca3af;margin-top:10px">Free forever on the hobby plan · Cancel anytime</p>
+        <a id="tour-cta" href="/thank-you" class="btn">Start free today</a>
+        <p class="footnote">Free forever on the hobby plan · Cancel anytime</p>
       </div>
 
-      <div id="tour-cards" style="display:flex;flex-direction:column;gap:12px">
-        {[
-          ['⚡', 'Zero flicker', 'Variants are served before the browser renders anything.'],
-          ['🔒', 'No client JS', 'Works entirely server-side — ad blockers can\'t interfere.'],
-          ['📊', 'Live results', 'See impressions and conversions in your dashboard in real time.'],
-          ['🔌', 'Any stack', 'Next.js, Astro, WordPress, Nuxt — one API key, any platform.'],
-        ].map(([icon, title, desc]) => (
-          <div style="display:flex;gap:16px;align-items:flex-start;background:#F5EDE0;border:1px solid #EAD9C4;border-radius:14px;padding:16px 20px">
-            <span style="font-size:22px">{icon}</span>
+      <!-- Right column: feature cards -->
+      <div id="tour-cards" class="cards">
+        {features.map(({ icon, title, desc }) => (
+          <div class="card">
+            <span class="card__icon">{icon}</span>
             <div>
-              <p style="font-size:14px;font-weight:700;color:#0F2235">{title}</p>
-              <p style="font-size:13px;color:#6b7280;margin-top:2px">{desc}</p>
+              <p class="card__title">{title}</p>
+              <p class="card__desc">{desc}</p>
             </div>
           </div>
         ))}
       </div>
+
     </div>
   </main>
 
-  <button id="tour-trigger" style="position:fixed;bottom:24px;left:24px;z-index:9999;background:#fff;border:1.5px solid #C96A3F;color:#C96A3F;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s,color .2s,border-color .2s">
-    See what Koryla can do →
-  </button>
+  <!-- Fixed button that launches the interactive tour -->
+  <button id="tour-trigger" class="tour-btn">See what Koryla can do →</button>
 
   <script is:inline src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
   <script is:inline define:vars={{ GH }}>
@@ -78,40 +85,36 @@ const GH = 'https://github.com/andresclua/koryla-astro-demo-example/blob/main'
             element: '#tour-badge',
             popover: {
               title: 'Change 1 — Social proof badge',
-              side: 'bottom',
-              align: 'start',
+              side: 'bottom', align: 'start',
               description: `<p style="margin-bottom:12px;color:#6b7280;font-size:13px;line-height:1.5">Control showed a plain category label. Variant B uses social proof to build immediate trust with first-time visitors.</p>
-<a href="${GH}/src/pages/hero-b.astro" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:#0F2235;color:#F5EDE0;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">View hero-b.astro on GitHub →</a>`
+<a href="${GH}/src/pages/hero-b.astro" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#0F2235;color:#F5EDE0;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">View hero-b.astro on GitHub →</a>`
             }
           },
           {
             element: '#tour-headline',
             popover: {
               title: 'Change 2 — Two-column layout + outcome headline',
-              side: 'bottom',
-              align: 'start',
+              side: 'bottom', align: 'start',
               description: `<p style="margin-bottom:12px;color:#6b7280;font-size:13px;line-height:1.5">Control was centered single-column. Variant B uses a two-column grid and an outcome-focused headline. The edge function rewrites <code style="background:#e5e7eb;padding:1px 5px;border-radius:3px">/hero → /hero-b</code> before any HTML reaches the browser.</p>
-<a href="${GH}/netlify/edge-functions/koryla.ts" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:#0F2235;color:#F5EDE0;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">View koryla.ts on GitHub →</a>`
+<a href="${GH}/netlify/edge-functions/koryla.ts" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#0F2235;color:#F5EDE0;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">View koryla.ts on GitHub →</a>`
             }
           },
           {
             element: '#tour-cards',
             popover: {
               title: 'Change 3 — Feature cards replace screenshot',
-              side: 'left',
-              align: 'start',
+              side: 'left', align: 'start',
               description: `<p style="margin-bottom:12px;color:#6b7280;font-size:13px;line-height:1.5">Control showed a dashboard screenshot. Variant B surfaces four concrete value props in scannable cards — easier to skim on mobile.</p>
-<a href="${GH}/src/pages/hero-b.astro" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:#0F2235;color:#F5EDE0;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">View hero-b.astro on GitHub →</a>`
+<a href="${GH}/src/pages/hero-b.astro" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#0F2235;color:#F5EDE0;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">View hero-b.astro on GitHub →</a>`
             }
           },
           {
             element: '#tour-cta',
             popover: {
               title: 'Change 4 — Navy CTA, no email gate',
-              side: 'top',
-              align: 'start',
+              side: 'top', align: 'start',
               description: `<p style="margin-bottom:12px;color:#6b7280;font-size:13px;line-height:1.5">Control had a terracotta button. Variant B uses navy and removes friction — one click to sign up, no email required.</p>
-<a href="${GH}/src/pages/hero-b.astro" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:#0F2235;color:#F5EDE0;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">View hero-b.astro on GitHub →</a>`
+<a href="${GH}/src/pages/hero-b.astro" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#0F2235;color:#F5EDE0;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">View hero-b.astro on GitHub →</a>`
             }
           }
         ]
@@ -119,4 +122,30 @@ const GH = 'https://github.com/andresclua/koryla-astro-demo-example/blob/main'
       driver.drive()
     })
   </script>
+
 </Layout>
+
+<style>
+  .page { max-width: 1100px; margin: 0 auto; padding: 80px 40px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+
+  .badge { display: inline-flex; align-items: center; gap: 8px; background: #FEF0E8; color: #C96A3F; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 999px; margin-bottom: 24px; }
+  .badge__dot { width: 6px; height: 6px; background: #C96A3F; border-radius: 50%; display: inline-block; }
+
+  h1 { font-size: clamp(36px, 4vw, 56px); font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 20px; color: #0F2235; }
+  .accent { color: #C96A3F; }
+
+  .subtitle { font-size: 17px; color: #4b5563; line-height: 1.65; margin-bottom: 32px; }
+
+  .btn { display: inline-block; background: #0F2235; color: #fff; padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 14px; text-decoration: none; }
+  .footnote { font-size: 12px; color: #9ca3af; margin-top: 10px; }
+
+  .cards { display: flex; flex-direction: column; gap: 12px; }
+  .card { display: flex; gap: 16px; align-items: flex-start; background: #F5EDE0; border: 1px solid #EAD9C4; border-radius: 14px; padding: 16px 20px; }
+  .card__icon { font-size: 22px; }
+  .card__title { font-size: 14px; font-weight: 700; color: #0F2235; }
+  .card__desc  { font-size: 13px; color: #6b7280; margin-top: 2px; }
+
+  .tour-btn { position: fixed; bottom: 24px; left: 24px; z-index: 9999; background: #fff; border: 1.5px solid #C96A3F; color: #C96A3F; padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background .2s, color .2s, border-color .2s; }
+</style>

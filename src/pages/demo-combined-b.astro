@@ -2,57 +2,83 @@
 import Layout from '../layouts/Layout.astro'
 import Experiment from '../components/Experiment.astro'
 import Variant from '../components/Variant.astro'
-const GH = 'https://github.com/andresclua/koryla-astro-demo-example/blob/main'
+import DemoHeader from '../components/demo/DemoHeader.astro'
+
+const steps = [
+  { label: 'Edge Layer', desc: '?variant=b matched UTM rule → rewrote request to /demo-combined-b' },
+  { label: 'Edge Layer', desc: 'Set cookie for the page-level assignment' },
+  { label: 'SDK Layer',  desc: '<Experiment> evaluated the CTA variant independently' },
+  { label: 'SDK Layer',  desc: 'Rendered only the active &lt;slot&gt; — other variant never sent to browser' },
+  { label: 'Result',     desc: 'Browser sees /demo-combined, gets full variant B experience' },
+]
 ---
+
+<!--
+  VARIANT B of the combined experiment.
+  This page is reached via edge rewrite when ?variant=b is in the URL.
+  The <Experiment> below is a second, independent A/B test running inside this page.
+-->
 <Layout title="Demo Combined" variant="variant-b — /demo-combined-b">
-  <main style="max-width:1100px;margin:0 auto;padding:80px 40px">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start">
+  <main class="page">
+    <div class="grid">
 
+      <!-- Left: variant B content with nested SDK experiment -->
       <div>
-        <div style="display:inline-block;background:#d1fae5;color:#065f46;font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:16px">
-          COMBINED: EDGE + SDK · VARIANT B
-        </div>
-        <h1 style="font-size:clamp(30px,4vw,50px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:16px;color:#0F2235">
-          Edge brought you here.<br/><span style="color:#059669">SDK handles the rest.</span>
-        </h1>
-        <p style="font-size:16px;color:#4b5563;line-height:1.65;margin-bottom:24px">
-          The edge function rewrote <code>/demo-combined?variant=b</code> to this page. Now the SDK experiment below assigns the CTA independently.
-        </p>
+        <DemoHeader
+          type="COMBINED"
+          badge="COMBINED: EDGE + SDK · VARIANT B"
+          title="Edge brought you here. SDK handles the rest."
+          description='The edge function rewrote <code>/demo-combined?variant=b</code> to this page. Now the SDK experiment assigns the CTA independently.'
+        />
 
+        <!--
+          Second layer: SDK experiment nested inside edge variant B.
+          Completely independent traffic split from the edge-level experiment above.
+        -->
         <Experiment id="bb1e7469-062c-4426-98ad-9b5ca8869f1b">
+
           <Variant slot="control">
-            <a href="/thank-you" style="display:inline-block;background:#C96A3F;color:#fff;padding:14px 28px;border-radius:12px;font-weight:700;font-size:15px;text-decoration:none">
-              Start testing free →
-            </a>
+            <a href="/thank-you" class="btn btn--terracotta">Start testing free →</a>
           </Variant>
+
           <Variant slot="b">
-            <a href="/thank-you" style="display:inline-block;background:#0F2235;color:#fff;padding:14px 28px;border-radius:12px;font-weight:700;font-size:15px;text-decoration:none">
-              A/B test in 5 min →
-            </a>
+            <a href="/thank-you" class="btn btn--navy">A/B test in 5 min →</a>
           </Variant>
+
         </Experiment>
       </div>
 
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:28px">
-        <div style="font-size:13px;font-weight:700;color:#059669;margin-bottom:16px">What happened (2 layers):</div>
-        {[
-          ['Edge Layer', '?variant=b matched rule → rewrote to /demo-combined-b'],
-          ['Edge Layer', 'Set cookie ky_<edge-id>=<b-uuid>'],
-          ['SDK Layer', '<Experiment> read cookie + UTM → assigned CTA variant'],
-          ['SDK Layer', 'Rendered only the active slot'],
-          ['Result', 'Browser sees /demo-combined, gets variant B content'],
-        ].map(([label, desc]) => (
-          <div style="margin-bottom:12px">
-            <span style="font-size:11px;font-weight:700;color:#059669;text-transform:uppercase">{label}</span>
-            <p style="font-size:13px;color:#4b5563;margin-top:2px">{desc}</p>
+      <!-- Right: trace of both layers -->
+      <div class="trace-box">
+        <p class="trace-title">What happened (2 layers):</p>
+        {steps.map(({ label, desc }) => (
+          <div class="step">
+            <span class="step-label">{label}</span>
+            <p class="step-desc" set:html={desc} />
           </div>
         ))}
-        <div style="margin-top:20px">
-          <a href={GH + '/netlify/edge-functions/koryla.ts'} target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#059669;color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">
-            View koryla.ts on GitHub →
-          </a>
-        </div>
+        <a href="https://github.com/andresclua/koryla-astro-demo-example/blob/main/netlify/edge-functions/koryla.ts" target="_blank" class="link-btn">
+          View koryla.ts on GitHub →
+        </a>
       </div>
+
     </div>
   </main>
 </Layout>
+
+<style>
+  .page { max-width: 1100px; margin: 0 auto; padding: 80px 40px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+
+  .btn { display: inline-block; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; color: #fff; }
+  .btn--terracotta { background: #C96A3F; }
+  .btn--navy       { background: #0F2235; }
+
+  .trace-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 20px; padding: 28px; }
+  .trace-title { font-size: 13px; font-weight: 700; color: #059669; margin-bottom: 16px; }
+  .step { margin-bottom: 12px; }
+  .step-label { font-size: 11px; font-weight: 700; color: #059669; text-transform: uppercase; }
+  .step-desc { font-size: 13px; color: #4b5563; margin-top: 2px; }
+
+  .link-btn { display: inline-flex; align-items: center; gap: 6px; background: #059669; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; margin-top: 20px; }
+</style>

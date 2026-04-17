@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config'
+import netlify from '@astrojs/netlify'
 
 export default defineConfig({
-  // Static output — no SSR needed for a test site
-  output: 'static',
+  output: 'server',
+  adapter: netlify(),
 })

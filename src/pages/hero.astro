@@ -1,50 +1,60 @@
 ---
 import Layout from '../layouts/Layout.astro'
 ---
+
+<!-- CONTROL variant: centered single-column hero -->
 <Layout title="Homepage Hero" variant="control — /hero">
-  <main style="max-width:900px;margin:0 auto;padding:80px 40px;text-align:center">
+  <main class="page">
 
-    <div style="display:inline-block;background:#FEF0E8;color:#C96A3F;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;margin-bottom:24px;letter-spacing:.3px">
-      ANALYTICS FOR DEVELOPERS
-    </div>
+    <span class="badge">ANALYTICS FOR DEVELOPERS</span>
 
-    <h1 style="font-size:clamp(40px,6vw,72px);font-weight:800;line-height:1.1;letter-spacing:-2px;margin-bottom:24px;color:#0F2235">
-      Know what your<br/>users actually do
-    </h1>
+    <h1>Know what your<br/>users actually do</h1>
 
-    <p style="font-size:18px;color:#6b7280;max-width:520px;margin:0 auto 40px;line-height:1.6">
+    <p class="subtitle">
       Koryla gives you real-time A/B testing without flicker, GDPR headaches,
       or bloated JS bundles. Just add a middleware and go.
     </p>
 
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <a href="/thank-you" style="background:#C96A3F;color:#fff;padding:14px 32px;border-radius:12px;font-weight:600;font-size:15px">
-        Start for free
-      </a>
-      <a href="/pricing" style="background:#f9fafb;color:#374151;padding:14px 32px;border-radius:12px;font-weight:600;font-size:15px;border:1px solid #e5e7eb">
-        See pricing
-      </a>
+    <div class="actions">
+      <a href="/thank-you" class="btn btn--primary">Start for free</a>
+      <a href="/pricing" class="btn btn--ghost">See pricing</a>
     </div>
 
-    <p style="font-size:13px;color:#9ca3af;margin-top:16px">No credit card required · Free forever on the hobby plan</p>
+    <p class="footnote">No credit card required · Free forever on the hobby plan</p>
 
-    <!-- Fake dashboard screenshot -->
-    <div style="margin-top:64px;background:#F5EDE0;border:1px solid #EAD9C4;border-radius:20px;padding:32px;text-align:left">
-      <div style="display:flex;gap:16px;margin-bottom:24px">
-        <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
-          <p style="font-size:28px;font-weight:700;color:#0F2235">48,291</p>
-          <p style="font-size:13px;color:#9ca3af;margin-top:4px">Page views today</p>
-        </div>
-        <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
-          <p style="font-size:28px;font-weight:700;color:#0F2235">3.4%</p>
-          <p style="font-size:13px;color:#9ca3af;margin-top:4px">Bounce rate</p>
-        </div>
-        <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
-          <p style="font-size:28px;font-weight:700;color:#0F2235">1m 42s</p>
-          <p style="font-size:13px;color:#9ca3af;margin-top:4px">Avg. session</p>
-        </div>
+    <!-- Fake dashboard preview -->
+    <div class="dashboard">
+      <div class="stats">
+        <div class="stat"><p class="stat__value">48,291</p><p class="stat__label">Page views today</p></div>
+        <div class="stat"><p class="stat__value">3.4%</p><p class="stat__label">Bounce rate</p></div>
+        <div class="stat"><p class="stat__value">1m 42s</p><p class="stat__label">Avg. session</p></div>
       </div>
-      <div style="height:80px;background:linear-gradient(to right,#F0C9B0,#C96A3F,#F0C9B0);border-radius:8px;opacity:.4" />
+      <div class="chart" />
     </div>
+
   </main>
 </Layout>
+
+<style>
+  .page { max-width: 900px; margin: 0 auto; padding: 80px 40px; text-align: center; }
+
+  .badge { display: inline-block; background: #FEF0E8; color: #C96A3F; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 999px; margin-bottom: 24px; letter-spacing: .3px; }
+
+  h1 { font-size: clamp(40px, 6vw, 72px); font-weight: 800; line-height: 1.1; letter-spacing: -2px; margin-bottom: 24px; color: #0F2235; }
+
+  .subtitle { font-size: 18px; color: #6b7280; max-width: 520px; margin: 0 auto 40px; line-height: 1.6; }
+
+  .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn { padding: 14px 32px; border-radius: 12px; font-weight: 600; font-size: 15px; text-decoration: none; }
+  .btn--primary { background: #C96A3F; color: #fff; }
+  .btn--ghost   { background: #f9fafb; color: #374151; border: 1px solid #e5e7eb; }
+
+  .footnote { font-size: 13px; color: #9ca3af; margin-top: 16px; }
+
+  .dashboard { margin-top: 64px; background: #F5EDE0; border: 1px solid #EAD9C4; border-radius: 20px; padding: 32px; text-align: left; }
+  .stats { display: flex; gap: 16px; margin-bottom: 24px; }
+  .stat { flex: 1; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; }
+  .stat__value { font-size: 28px; font-weight: 700; color: #0F2235; }
+  .stat__label { font-size: 13px; color: #9ca3af; margin-top: 4px; }
+  .chart { height: 80px; background: linear-gradient(to right, #F0C9B0, #C96A3F, #F0C9B0); border-radius: 8px; opacity: .4; }
+</style>

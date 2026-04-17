@@ -1,13 +1,10 @@
 ---
 /**
- * Component-level A/B test demo — shows @koryla/astro in action.
+ * Component-level A/B test demo — shows getVariant() in action.
  *
- * This page tests a CTA section within a single page (instead of routing
- * to a different URL). The edge function is NOT involved — variant assignment
- * happens here in the frontmatter, server-side.
- *
- * In a real project: npm install @koryla/astro
- * Here we use the inline helper at src/lib/getVariant.ts (same logic).
+ * The edge function is NOT involved here. Variant assignment happens
+ * in this frontmatter, server-side, by calling getVariant() directly.
+ * Both variants render at the same URL (/sdk-demo).
  */
 import Layout from '../layouts/Layout.astro'
 import { getVariant } from '../lib/getVariant'
@@ -17,7 +14,7 @@ const result = await getVariant(Astro.request, import.meta.env.KORYLA_COMPONENT_
   apiUrl: import.meta.env.KORYLA_API_URL ?? 'https://koryla.com',
 })
 
-// Persist variant cookie on new assignment
+// Persist variant cookie on first assignment
 if (result?.isNewAssignment) {
   Astro.cookies.set(result.cookieName, result.variantId, {
     maxAge: 60 * 60 * 24 * 30,
@@ -31,65 +28,46 @@ const variantLabel = result ? `${result.variant.name} (${result.variantId.slice(
 ---
 
 <Layout title="Component SDK Demo" variant={`sdk-demo · ${variantLabel}`}>
-  <main style="max-width:900px;margin:0 auto;padding:80px 40px">
+  <main class="page">
 
-    <!-- Explanation banner -->
-    <div style="background:#F5EDE0;border:1px solid #EAD9C4;border-radius:16px;padding:24px 28px;margin-bottom:56px">
-      <p style="font-size:13px;font-weight:700;color:#C96A3F;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">
-        Component SDK Demo · @koryla/astro
-      </p>
-      <p style="font-size:15px;color:#0F2235;line-height:1.6;margin-bottom:0">
+    <!-- Explains what this page does -->
+    <div class="info-banner">
+      <p class="info-banner__label">Component SDK Demo · getVariant()</p>
+      <p class="info-banner__body">
         This page shows <strong>component-level A/B testing</strong> — not URL routing.
         The edge function is not involved. Variant assignment happens in the Astro frontmatter using
-        <code style="background:#EAD9C4;padding:2px 6px;border-radius:4px;font-size:13px">getVariant()</code>,
-        which calls the Koryla API server-side and reads the visitor cookie.
-        Both variants render on the <em>same URL</em> (<code style="background:#EAD9C4;padding:2px 6px;border-radius:4px;font-size:13px">/sdk-demo</code>).
+        <code>getVariant()</code>, which calls the Koryla API server-side and reads the visitor cookie.
+        Both variants render on the <em>same URL</em> (<code>/sdk-demo</code>).
       </p>
     </div>
 
-    <!-- A/B tested CTA section -->
+    <!-- The A/B tested section — isControl determines which variant renders -->
     {isControl ? (
-      <!-- Control variant -->
-      <section style="text-align:center;padding:64px 40px;background:#fff;border:1px solid #e5e7eb;border-radius:24px">
-        <div style="display:inline-block;background:#FEF0E8;color:#C96A3F;font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;margin-bottom:20px;letter-spacing:.4px">
-          CONTROL VARIANT
-        </div>
-        <h2 style="font-size:clamp(28px,4vw,48px);font-weight:800;color:#0F2235;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.1">
-          Start testing in 5 minutes
-        </h2>
-        <p style="font-size:17px;color:#6b7280;max-width:480px;margin:0 auto 36px;line-height:1.6">
-          Deploy a Cloudflare Worker, create an experiment, and get live results — no code changes to your site.
-        </p>
-        <a href="/thank-you"
-           style="display:inline-block;background:#0F2235;color:#fff;padding:14px 32px;border-radius:12px;font-weight:600;font-size:15px;text-decoration:none">
-          Get started free
-        </a>
-        <p style="font-size:13px;color:#9ca3af;margin-top:14px">No credit card · Free forever on hobby plan</p>
+
+      <section class="variant variant--control">
+        <span class="variant__badge variant__badge--control">CONTROL VARIANT</span>
+        <h2>Start testing in 5 minutes</h2>
+        <p>Deploy a Cloudflare Worker, create an experiment, and get live results — no code changes to your site.</p>
+        <a href="/thank-you" class="btn btn--dark">Get started free</a>
+        <p class="footnote">No credit card · Free forever on hobby plan</p>
       </section>
+
     ) : (
-      <!-- Variant B — different copy + terracotta CTA -->
-      <section style="text-align:center;padding:64px 40px;background:#FEF0E8;border:2px solid #F0C9B0;border-radius:24px">
-        <div style="display:inline-block;background:#C96A3F;color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;margin-bottom:20px;letter-spacing:.4px">
-          VARIANT B
-        </div>
-        <h2 style="font-size:clamp(28px,4vw,48px);font-weight:800;color:#0F2235;letter-spacing:-1.5px;margin-bottom:16px;line-height:1.1">
-          A/B test anything — without touching your code
-        </h2>
-        <p style="font-size:17px;color:#6b7280;max-width:480px;margin:0 auto 36px;line-height:1.6">
-          Koryla runs at the edge. Your site stays exactly the same — the visitor just sees a different variant.
-        </p>
-        <a href="/thank-you"
-           style="display:inline-block;background:#C96A3F;color:#fff;padding:14px 32px;border-radius:12px;font-weight:600;font-size:15px;text-decoration:none">
-          Try Koryla free
-        </a>
-        <p style="font-size:13px;color:#9ca3af;margin-top:14px">No credit card · Unlimited experiments on growth plan</p>
+
+      <section class="variant variant--b">
+        <span class="variant__badge variant__badge--b">VARIANT B</span>
+        <h2>A/B test anything — without touching your code</h2>
+        <p>Koryla runs at the edge. Your site stays exactly the same — the visitor just sees a different variant.</p>
+        <a href="/thank-you" class="btn btn--terracotta">Try Koryla free</a>
+        <p class="footnote">No credit card · Unlimited experiments on growth plan</p>
       </section>
+
     )}
 
-    <!-- Code snippet explanation -->
-    <div style="margin-top:56px;background:#0F2235;border-radius:16px;padding:32px">
-      <p style="font-size:13px;font-weight:600;color:#F0C9B0;margin-bottom:16px;letter-spacing:.3px">HOW THIS PAGE WORKS — ASTRO FRONTMATTER</p>
-      <pre style="font-family:'Courier New',monospace;font-size:13px;color:#e5e7eb;line-height:1.7;overflow-x:auto;white-space:pre-wrap"><code>import &#123; getVariant &#125; from '@koryla/astro'
+    <!-- Code snippet showing how this page works -->
+    <div class="code-box">
+      <p class="code-box__label">HOW THIS PAGE WORKS — ASTRO FRONTMATTER</p>
+      <pre><code>import &#123; getVariant &#125; from '@koryla/astro'
 
 const result = await getVariant(Astro.request, 'exp-id', &#123;
   apiKey: import.meta.env.KORYLA_API_KEY,
@@ -97,21 +75,51 @@ const result = await getVariant(Astro.request, 'exp-id', &#123;
 &#125;)
 
 if (result?.isNewAssignment) &#123;
-  Astro.cookies.set(result.cookieName, result.variantId, &#123;
-    maxAge: 60 * 60 * 24 * 30,
-    path: '/',
-  &#125;)
+  Astro.cookies.set(result.cookieName, result.variantId, &#123; ... &#125;)
 &#125;
 
 const isControl = !result || result.variant.is_control</code></pre>
     </div>
 
-    <!-- Navigation -->
-    <div style="margin-top:40px;display:flex;gap:12px;justify-content:center">
-      <a href="/" style="color:#C96A3F;font-size:14px;font-weight:600">← Homepage (URL-rewrite demo)</a>
-      <span style="color:#d1d5db">·</span>
-      <a href="/pricing" style="color:#C96A3F;font-size:14px;font-weight:600">Pricing demo →</a>
-    </div>
+    <nav class="page-nav">
+      <a href="/">← Homepage (URL-rewrite demo)</a>
+      <span>·</span>
+      <a href="/pricing">Pricing demo →</a>
+    </nav>
 
   </main>
 </Layout>
+
+<style>
+  .page { max-width: 900px; margin: 0 auto; padding: 80px 40px; }
+
+  .info-banner { background: #F5EDE0; border: 1px solid #EAD9C4; border-radius: 16px; padding: 24px 28px; margin-bottom: 56px; }
+  .info-banner__label { font-size: 13px; font-weight: 700; color: #C96A3F; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .info-banner__body { font-size: 15px; color: #0F2235; line-height: 1.6; }
+
+  /* A/B variant sections */
+  .variant { text-align: center; padding: 64px 40px; border-radius: 24px; }
+  .variant--control { background: #fff; border: 1px solid #e5e7eb; }
+  .variant--b       { background: #FEF0E8; border: 2px solid #F0C9B0; }
+
+  .variant__badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 999px; margin-bottom: 20px; letter-spacing: .4px; }
+  .variant__badge--control { background: #FEF0E8; color: #C96A3F; }
+  .variant__badge--b       { background: #C96A3F; color: #fff; }
+
+  .variant h2 { font-size: clamp(28px, 4vw, 48px); font-weight: 800; color: #0F2235; letter-spacing: -1.5px; margin-bottom: 16px; line-height: 1.1; }
+  .variant p { font-size: 17px; color: #6b7280; max-width: 480px; margin: 0 auto 36px; line-height: 1.6; }
+
+  .btn { display: inline-block; padding: 14px 32px; border-radius: 12px; font-weight: 600; font-size: 15px; text-decoration: none; color: #fff; }
+  .btn--dark       { background: #0F2235; }
+  .btn--terracotta { background: #C96A3F; }
+
+  .footnote { font-size: 13px; color: #9ca3af; margin-top: 14px; }
+
+  .code-box { margin-top: 56px; background: #0F2235; border-radius: 16px; padding: 32px; }
+  .code-box__label { font-size: 13px; font-weight: 600; color: #F0C9B0; margin-bottom: 16px; letter-spacing: .3px; }
+  pre { font-family: 'Courier New', monospace; font-size: 13px; color: #e5e7eb; line-height: 1.7; overflow-x: auto; white-space: pre-wrap; margin: 0; }
+
+  .page-nav { margin-top: 40px; display: flex; gap: 12px; justify-content: center; font-size: 14px; font-weight: 600; color: #C96A3F; }
+  .page-nav a { color: #C96A3F; text-decoration: none; }
+  .page-nav span { color: #d1d5db; }
+</style>

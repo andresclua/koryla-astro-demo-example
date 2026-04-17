@@ -68,11 +68,12 @@ export async function getVariant(
   let variantId: string
   let isNewAssignment = false
 
-  // UTM/query param rules take priority over cookie
+  // UTM/query param rules take priority — but don't set a sticky cookie
+  // so removing the param reverts to the normal random/cookie assignment
   const ruleMatch = findRuleMatch(experiment.variants, url.searchParams)
   if (ruleMatch) {
     variantId = ruleMatch.id
-    isNewAssignment = variantId !== cookieVariantId
+    isNewAssignment = false
   } else {
     const stored = cookieVariantId ? experiment.variants.find(v => v.id === cookieVariantId) : null
     if (stored) {

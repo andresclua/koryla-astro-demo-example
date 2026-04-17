@@ -2,52 +2,65 @@
 import Layout from '../layouts/Layout.astro'
 import Experiment from '../components/Experiment.astro'
 import Variant from '../components/Variant.astro'
-
-const GH = 'https://github.com/andresclua/koryla-astro-demo-example/blob/main'
+import DemoHeader from '../components/demo/DemoHeader.astro'
+import HowToTest from '../components/demo/HowToTest.astro'
+import CodeDiagram from '../components/demo/CodeDiagram.astro'
 ---
+
 <Layout title="Demo SDK" variant="SDK — /demo-sdk">
-  <main style="max-width:900px;margin:0 auto;padding:80px 40px;text-align:center">
+  <main class="page">
 
-    <div style="display:inline-block;background:#e0e7ff;color:#3730a3;font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:16px;letter-spacing:.3px">
-      SDK EXPERIMENT
-    </div>
-    <h1 style="font-size:clamp(36px,5vw,60px);font-weight:800;line-height:1.1;letter-spacing:-2px;margin-bottom:16px;color:#0F2235">
-      Component-level A/B test
-    </h1>
-    <p style="font-size:17px;color:#6b7280;max-width:560px;margin:0 auto 48px;line-height:1.6">
-      Same URL, different CTA text. No URL rewrite needed — the variant is assigned in the Astro frontmatter using <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px">&lt;Experiment&gt;</code>.
-    </p>
+    <DemoHeader
+      type="SDK"
+      badge="SDK EXPERIMENT"
+      title="Component-level A/B test"
+      description="Same URL, different CTA text. No URL rewrite needed — variant assigned server-side by <code>&lt;Experiment&gt;</code>."
+    />
 
+    <!--
+      <Experiment> calls getVariant() in the Astro server.
+      It checks ?utm_text first, then the cookie, then assigns randomly.
+      Only the matching <Variant slot="..."> is rendered — the other never reaches the browser.
+    -->
     <Experiment id="bb1e7469-062c-4426-98ad-9b5ca8869f1b">
+
+      <!-- Shown when no UTM param is present -->
       <Variant slot="control">
-        <a href="/thank-you" style="display:inline-block;background:#C96A3F;color:#fff;padding:16px 40px;border-radius:14px;font-weight:700;font-size:17px;text-decoration:none">
-          Start testing free →
-        </a>
-        <p style="font-size:12px;color:#9ca3af;margin-top:12px">control · default variant</p>
+        <a href="/thank-you" class="btn btn--terracotta">Start testing free →</a>
+        <p class="hint">control · default variant</p>
       </Variant>
+
+      <!-- Shown only when ?utm_text=variation-1 is in the URL -->
       <Variant slot="b">
-        <a href="/thank-you" style="display:inline-block;background:#0F2235;color:#fff;padding:16px 40px;border-radius:14px;font-weight:700;font-size:17px;text-decoration:none">
-          A/B test in 5 min →
-        </a>
-        <p style="font-size:12px;color:#9ca3af;margin-top:12px">variant b · triggered by <code>?utm_text=variation-1</code></p>
+        <a href="/thank-you" class="btn btn--navy">A/B test in 5 min →</a>
+        <p class="hint">variant b · triggered by <code>?utm_text=variation-1</code></p>
       </Variant>
+
     </Experiment>
 
-    <div style="margin-top:48px;background:#f8faff;border:1px solid #c7d2fe;border-radius:16px;padding:28px;text-align:left">
-      <p style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:12px">🧪 HOW TO TEST</p>
-      <p style="font-size:14px;color:#4b5563;margin-bottom:8px">1. Open this page without UTM → see control CTA (terracotta)</p>
-      <p style="font-size:14px;color:#4b5563;margin-bottom:16px">2. Add <code style="background:#e0e7ff;padding:2px 6px;border-radius:4px">?utm_text=variation-1</code> to the URL → see variant B CTA (navy)</p>
-      <a href={GH + '/src/pages/demo-sdk.astro'} target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#3730a3;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none">
-        View demo-sdk.astro on GitHub →
-      </a>
-    </div>
+    <HowToTest
+      steps={[
+        'Open this page without UTM → see control CTA (terracotta)',
+        'Add <code>?utm_text=variation-1</code> to the URL → see variant B CTA (navy)',
+      ]}
+      githubPath="/src/pages/demo-sdk.astro"
+    />
 
-    <div style="margin-top:32px;background:#0F2235;border-radius:16px;padding:28px;text-align:left;color:#e2e8f0;font-size:13px;font-family:monospace;line-height:2">
-      <span style="color:#94a3b8">// What runs where</span><br/>
-      <span style="color:#f59e0b">Edge function</span> → NOT involved (no URL rewrite for SDK experiments)<br/>
-      <span style="color:#6366f1">Astro frontmatter</span> → getVariant() reads cookie + UTM param → assigns variant<br/>
-      <span style="color:#6366f1">Astro frontmatter</span> → sets <code>ky_&lt;id&gt;</code> cookie (sticky 30 days)<br/>
-      <span style="color:#6366f1">&lt;Experiment&gt;</span> → renders only the active <code>&lt;slot&gt;</code>
-    </div>
+    <CodeDiagram lines={[
+      { color: 'comment',  text: '// What runs where' },
+      { color: 'edge',     text: 'Edge function → NOT involved (no URL rewrite for SDK experiments)' },
+      { color: 'sdk',      text: 'Astro server → getVariant() checks UTM param → assigns variant' },
+      { color: 'sdk',      text: 'Astro server → UTM match does NOT set a sticky cookie' },
+      { color: 'sdk',      text: '&lt;Experiment&gt; → renders only the active &lt;slot&gt;' },
+    ]} />
+
   </main>
 </Layout>
+
+<style>
+  .page { max-width: 900px; margin: 0 auto; padding: 80px 40px; text-align: center; display: flex; flex-direction: column; gap: 32px; }
+  .btn { display: inline-block; padding: 16px 40px; border-radius: 14px; font-weight: 700; font-size: 17px; text-decoration: none; color: #fff; }
+  .btn--terracotta { background: #C96A3F; }
+  .btn--navy       { background: #0F2235; }
+  .hint { font-size: 12px; color: #9ca3af; margin-top: 12px; }
+</style>
