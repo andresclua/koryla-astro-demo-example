@@ -184,21 +184,24 @@ export default async function handler(request: Request, context: NetlifyContext)
   // This prevents conversion pages from being accidentally rewritten
   const reqUrl = new URL(request.url)
   const experiments = await engine.getActiveExperiments()
+  const reqPath = reqUrl.pathname.replace(/\/$/, '') || '/'
+  let isConversionPage = false
+
+  // Loop ALL experiments — multiple experiments can share the same conversion_url
   for (const exp of experiments) {
     if (!exp.conversion_url) continue
     try {
       const convPath = new URL(exp.conversion_url).pathname.replace(/\/$/, '') || '/'
-      const reqPath = reqUrl.pathname.replace(/\/$/, '') || '/'
-      if (reqPath === convPath) {
-        const variantCookieKey = `${COOKIE_PREFIX}${exp.id}`
-        const variantId = cookies[variantCookieKey] ?? null
-        if (variantId) {
-          await fireEvent({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion', metadata: buildEnrichment(request, reqUrl, context) })
-        }
-        return context.next()
+      if (reqPath !== convPath) continue
+      isConversionPage = true
+      const variantCookieKey = `${COOKIE_PREFIX}${exp.id}`
+      const variantId = cookies[variantCookieKey] ?? null
+      if (variantId) {
+        await fireEvent({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion', metadata: buildEnrichment(request, reqUrl, context) })
       }
     } catch { /* ignore */ }
   }
+  if (isConversionPage) return context.next()
 
   const result = await engine.process(request.url, cookieHeader)
 
