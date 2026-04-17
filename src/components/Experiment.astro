@@ -1,0 +1,25 @@
+---
+import { getVariant } from '../lib/getVariant'
+
+interface Props {
+  id: string
+}
+
+const { id } = Astro.props
+
+const result = await getVariant(Astro.request, id, {
+  apiKey: import.meta.env.KORYLA_API_KEY ?? '',
+  apiUrl: import.meta.env.KORYLA_API_URL ?? 'https://koryla.com',
+})
+
+const active = result?.variant.name ?? 'control'
+
+if (result?.isNewAssignment) {
+  Astro.cookies.set(result.cookieName, result.variantId, {
+    maxAge: 60 * 60 * 24 * 30,
+    sameSite: 'lax',
+    path: '/',
+  })
+}
+---
+<slot name={active} />
