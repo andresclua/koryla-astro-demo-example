@@ -7,13 +7,19 @@ interface Props {
 
 const { id } = Astro.props
 
-const result = await getVariant(Astro.request, id, {
-  apiKey: import.meta.env.KORYLA_API_KEY ?? '',
-  apiUrl: import.meta.env.KORYLA_API_URL ?? 'https://koryla.com',
-})
+const apiKey = import.meta.env.KORYLA_API_KEY ?? ''
+const apiUrl = import.meta.env.KORYLA_API_URL ?? 'https://koryla.com'
+
+const result = await getVariant(Astro.request, id, { apiKey, apiUrl })
 
 const active = result?.variant.name ?? 'control'
 
+// --- Session ID (mirrors edge function logic) ---
+const sessionCookie = Astro.cookies.get('ky_session')?.value
+const sessionId = sessionCookie ?? crypto.randomUUID()
+const isNewSession = !sessionCookie
+
+// --- Variant cookie ---
 if (result?.isNewAssignment) {
   Astro.cookies.set(result.cookieName, result.variantId, {
     maxAge: 60 * 60 * 24 * 30,
@@ -22,8 +28,29 @@ if (result?.isNewAssignment) {
   })
 }
 
-// Render only the active named slot to avoid the dynamic slot[name] compiler error.
-// Astro.slots.render() accepts a static-evaluated string at runtime and returns HTML.
+if (isNewSession) {
+  Astro.cookies.set('ky_session', sessionId, {
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: 'lax',
+    path: '/',
+  })
+}
+
+// --- Fire impression event (non-blocking) ---
+if (result && apiKey) {
+  fetch(`${apiUrl}/api/worker/event`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      experiment_id: result.experiment.id,
+      variant_id: result.variantId,
+      session_id: sessionId,
+      event_type: 'impression',
+    }),
+  }).catch(() => { /* ignore network errors */ })
+}
+
+// Render only the active named slot — avoids the dynamic slot[name] compiler error
 const html = Astro.slots.has(active)
   ? await Astro.slots.render(active)
   : await Astro.slots.render('control')
