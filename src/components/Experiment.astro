@@ -38,6 +38,10 @@ if (isNewSession) {
 
 // --- Fire impression event (non-blocking) ---
 if (result && apiKey) {
+  const reqUrl = new URL(Astro.request.url)
+  const ua = Astro.request.headers.get('user-agent') ?? ''
+  const deviceType = /tablet|ipad/i.test(ua) ? 'tablet' : /mobile|android|iphone|ipod/i.test(ua) ? 'mobile' : 'desktop'
+
   fetch(`${apiUrl}/api/worker/event`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
@@ -46,6 +50,14 @@ if (result && apiKey) {
       variant_id: result.variantId,
       session_id: sessionId,
       event_type: 'impression',
+      metadata: {
+        utm_source: reqUrl.searchParams.get('utm_source') ?? undefined,
+        utm_medium: reqUrl.searchParams.get('utm_medium') ?? undefined,
+        utm_campaign: reqUrl.searchParams.get('utm_campaign') ?? undefined,
+        referrer: Astro.request.headers.get('referer') ?? undefined,
+        page_url: reqUrl.pathname,
+        device_type: deviceType,
+      },
     }),
   }).catch(() => { /* ignore network errors */ })
 }

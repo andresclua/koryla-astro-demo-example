@@ -126,6 +126,12 @@ function getSessionId(cookies: Record<string, string>): string {
   return crypto.randomUUID()
 }
 
+function parseDeviceType(ua: string): 'mobile' | 'tablet' | 'desktop' {
+  if (/tablet|ipad/i.test(ua)) return 'tablet'
+  if (/mobile|android|iphone|ipod/i.test(ua)) return 'mobile'
+  return 'desktop'
+}
+
 async function fireEvent(payload: {
   experiment_id: string
   variant_id: string
@@ -148,6 +154,20 @@ async function fireEvent(payload: {
 interface NetlifyContext {
   next: () => Promise<Response>
   rewrite: (url: string | URL) => Promise<Response>
+  geo?: { country?: string; subdivision?: { code?: string } }
+}
+
+function buildEnrichment(request: Request, url: URL, context: NetlifyContext) {
+  const ua = request.headers.get('user-agent') ?? ''
+  return {
+    utm_source: url.searchParams.get('utm_source') ?? undefined,
+    utm_medium: url.searchParams.get('utm_medium') ?? undefined,
+    utm_campaign: url.searchParams.get('utm_campaign') ?? undefined,
+    referrer: request.headers.get('referer') ?? undefined,
+    page_url: url.pathname,
+    device_type: parseDeviceType(ua),
+    country: context.geo?.country ?? undefined,
+  }
 }
 
 export default async function handler(request: Request, context: NetlifyContext): Promise<Response> {
@@ -173,7 +193,7 @@ export default async function handler(request: Request, context: NetlifyContext)
         const variantCookieKey = `${COOKIE_PREFIX}${exp.id}`
         const variantId = cookies[variantCookieKey] ?? null
         if (variantId) {
-          await fireEvent({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion' })
+          await fireEvent({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion', metadata: buildEnrichment(request, reqUrl, context) })
         }
         return context.next()
       }
@@ -195,6 +215,7 @@ export default async function handler(request: Request, context: NetlifyContext)
     variant_id: result.variantId,
     session_id: sessionId,
     event_type: 'impression',
+    metadata: buildEnrichment(request, reqUrl, context),
   })
 
   const response = isSamePath ? await context.next() : await context.rewrite(result.targetUrl)

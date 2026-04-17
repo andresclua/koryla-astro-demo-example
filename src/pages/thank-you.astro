@@ -19,7 +19,18 @@ if (apiKey) {
       }>
 
       const sessionId = Astro.cookies.get('ky_session')?.value ?? crypto.randomUUID()
-      const thisPath = new URL(Astro.request.url).pathname.replace(/\/$/, '') || '/'
+      const reqUrl = new URL(Astro.request.url)
+      const thisPath = reqUrl.pathname.replace(/\/$/, '') || '/'
+      const ua = Astro.request.headers.get('user-agent') ?? ''
+      const deviceType = /tablet|ipad/i.test(ua) ? 'tablet' : /mobile|android|iphone|ipod/i.test(ua) ? 'mobile' : 'desktop'
+      const enrichment = {
+        utm_source: reqUrl.searchParams.get('utm_source') ?? undefined,
+        utm_medium: reqUrl.searchParams.get('utm_medium') ?? undefined,
+        utm_campaign: reqUrl.searchParams.get('utm_campaign') ?? undefined,
+        referrer: Astro.request.headers.get('referer') ?? undefined,
+        page_url: reqUrl.pathname,
+        device_type: deviceType,
+      }
 
       for (const exp of experiments) {
         if (!exp.conversion_url) continue
@@ -33,7 +44,7 @@ if (apiKey) {
         fetch(`${apiUrl}/api/worker/event`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-          body: JSON.stringify({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion' }),
+          body: JSON.stringify({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion', metadata: enrichment }),
         }).catch(() => {})
       }
     }
