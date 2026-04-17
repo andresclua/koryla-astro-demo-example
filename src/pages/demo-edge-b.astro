@@ -1,0 +1,46 @@
+---
+import Layout from '../layouts/Layout.astro'
+const GH = 'https://github.com/andresclua/koryla-astro-demo-example/blob/main'
+---
+<Layout title="Demo Edge" variant="variant-b — /demo-edge-b">
+  <main style="max-width:1100px;margin:0 auto;padding:80px 40px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center">
+
+      <div>
+        <div style="display:inline-block;background:#FEF0E8;color:#C96A3F;font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:16px">
+          EDGE EXPERIMENT · VARIANT B
+        </div>
+        <h1 style="font-size:clamp(32px,4vw,52px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:16px;color:#0F2235">
+          You're seeing<br/><span style="color:#C96A3F">Variant B</span>
+        </h1>
+        <p style="font-size:16px;color:#4b5563;line-height:1.65;margin-bottom:32px">
+          The edge function rewrote your request from <code>/demo-edge</code> to <code>/demo-edge-b</code> — completely transparent to the browser.
+        </p>
+        <a href="/thank-you" style="display:inline-block;background:#0F2235;color:#fff;padding:14px 28px;border-radius:12px;font-weight:700;font-size:15px;text-decoration:none">
+          Start your first test →
+        </a>
+      </div>
+
+      <div style="background:#F5EDE0;border-radius:20px;padding:28px">
+        <div style="font-size:13px;font-weight:700;color:#C96A3F;margin-bottom:16px">Edge function did this:</div>
+        {[
+          ['1.', 'Intercepted GET /demo-edge'],
+          ['2.', 'No cookie found → 50/50 random → you got variant B'],
+          ['3.', 'Rewrote URL to /demo-edge-b'],
+          ['4.', 'Set-Cookie ky_<id>=<variant-b-uuid>'],
+          ['5.', 'Your browser still shows /demo-edge ✓'],
+        ].map(([n, t]) => (
+          <div style="display:flex;gap:12px;margin-bottom:12px">
+            <span style="color:#C96A3F;font-weight:700;min-width:20px">{n}</span>
+            <span style="color:#4b5563;font-size:14px">{t}</span>
+          </div>
+        ))}
+        <div style="margin-top:20px">
+          <a href={GH + '/netlify/edge-functions/koryla.ts'} target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#C96A3F;color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">
+            View koryla.ts on GitHub →
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
