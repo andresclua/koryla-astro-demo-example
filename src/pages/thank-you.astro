@@ -1,8 +1,47 @@
 ---
 import Layout from '../layouts/Layout.astro'
+
+const apiKey = import.meta.env.KORYLA_API_KEY ?? ''
+const apiUrl = import.meta.env.KORYLA_API_URL ?? 'https://koryla.com'
+const COOKIE_PREFIX = 'ky_'
+
+// --- Fire conversion events for any SDK experiment whose conversion_url matches this page ---
+// The edge function already handles this for edge experiments.
+// For SDK experiments we do it here explicitly so it's visible in the code.
+if (apiKey) {
+  try {
+    const res = await fetch(`${apiUrl}/api/worker/config`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    })
+    if (res.ok) {
+      const experiments = await res.json() as Array<{
+        id: string; conversion_url?: string
+      }>
+
+      const sessionId = Astro.cookies.get('ky_session')?.value ?? crypto.randomUUID()
+      const thisPath = new URL(Astro.request.url).pathname.replace(/\/$/, '') || '/'
+
+      for (const exp of experiments) {
+        if (!exp.conversion_url) continue
+        const convPath = new URL(exp.conversion_url).pathname.replace(/\/$/, '') || '/'
+        if (convPath !== thisPath) continue
+
+        const variantId = Astro.cookies.get(`${COOKIE_PREFIX}${exp.id}`)?.value
+        if (!variantId) continue
+
+        // Fire conversion — non-blocking
+        fetch(`${apiUrl}/api/worker/event`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+          body: JSON.stringify({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion' }),
+        }).catch(() => {})
+      }
+    }
+  } catch { /* ignore network errors */ }
+}
 ---
 
-<!-- Conversion page — Koryla records a conversion event when a visitor reaches this URL -->
+<!-- Conversion page — fires a conversion event for every experiment whose conversion_url matches /thank-you -->
 <Layout title="Thank you" variant="conversion page">
   <main class="page">
 
