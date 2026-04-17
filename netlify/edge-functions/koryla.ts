@@ -9,7 +9,7 @@
 
 interface Variant {
   id: string; name: string; traffic_weight: number
-  target_url: string; is_control: boolean
+  target_url: string; is_control: boolean; rules?: { param: string; value: string }[]
 }
 
 interface Experiment {
@@ -57,6 +57,16 @@ function createSplitEngine(options: { apiKey: string; apiUrl: string }) {
     )
   }
 
+  function findRuleMatch(variants: Variant[], searchParams: URLSearchParams): Variant | null {
+    for (const v of variants) {
+      if (!v.rules?.length) continue
+      for (const rule of v.rules) {
+        if (searchParams.get(rule.param) === rule.value) return v
+      }
+    }
+    return null
+  }
+
   async function process(urlString: string, cookieHeader: string): Promise<SplitResult | null> {
     const experiments = await getConfig()
     if (!experiments.length) return null
@@ -84,7 +94,11 @@ function createSplitEngine(options: { apiKey: string; apiUrl: string }) {
     let variantId = cookies[cookieName]
     let isNewAssignment = false
 
-    if (!variantId || !experiment.variants.find(v => v.id === variantId)) {
+    const ruleMatch = findRuleMatch(experiment.variants, url.searchParams)
+    if (ruleMatch && ruleMatch.id !== variantId) {
+      variantId = ruleMatch.id
+      isNewAssignment = true
+    } else if (!variantId || !experiment.variants.find(v => v.id === variantId)) {
       variantId = assignVariant(experiment.variants)
       isNewAssignment = true
     }
