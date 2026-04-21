@@ -2,64 +2,67 @@
 import Layout from '../layouts/Layout.astro'
 import Experiment from '../components/Experiment.astro'
 import Variant from '../components/Variant.astro'
-import DemoHeader from '../components/demo/DemoHeader.astro'
 
-const steps = [
-  { label: 'Edge Layer', desc: '?variant=b matched UTM rule → rewrote request to /demo-combined-b' },
-  { label: 'Edge Layer', desc: 'Set cookie for the page-level assignment' },
-  { label: 'SDK Layer',  desc: '<Experiment> evaluated the CTA variant independently' },
-  { label: 'SDK Layer',  desc: 'Rendered only the active &lt;slot&gt; — other variant never sent to browser' },
-  { label: 'Result',     desc: 'Browser sees /demo-combined, gets full variant B experience' },
+const featureCards = [
+  ['🚀', 'Edge-first', 'Edge function runs before any rendering.'],
+  ['🔬', 'SDK layer', 'Component-level control with zero extra requests.'],
+  ['📈', 'Both tracked', 'Each layer records its own impressions independently.'],
 ]
 ---
 
-<!--
-  VARIANT B of the combined experiment.
-  This page is reached via edge rewrite when ?variant=b is in the URL.
-  The <Experiment> below is a second, independent A/B test running inside this page.
--->
-<Layout title="Demo Combined" variant="variant-b — /demo-combined-b">
+<Layout title="Demo Combined" variant="b — /demo-combined">
   <main class="page">
     <div class="grid">
 
-      <!-- Left: variant B content with nested SDK experiment -->
       <div>
-        <DemoHeader
-          type="COMBINED"
-          badge="COMBINED: EDGE + SDK · VARIANT B"
-          title="Edge brought you here. SDK handles the rest."
-          description='The edge function rewrote <code>/demo-combined?variant=b</code> to this page. Now the SDK experiment assigns the CTA independently.'
-        />
+        <div style="display:inline-block;background:#F5EDE0;color:#C96A3F;font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;margin-bottom:24px;letter-spacing:.5px">
+          COMBINED EXPERIMENT · EDGE + SDK
+        </div>
 
-        <!--
-          Second layer: SDK experiment nested inside edge variant B.
-          Completely independent traffic split from the edge-level experiment above.
-        -->
+        <h1>Koryla on Astro —<br/>two layers of control.</h1>
+
+        <p class="subtitle">
+          Edge assigned you variant B (two-column layout).
+          The SDK still controls the button style independently.
+        </p>
+
         <Experiment id="bb1e7469-062c-4426-98ad-9b5ca8869f1b">
 
           <Variant slot="control">
-            <a href="/thank-you" class="btn btn--terracotta">Start testing free →</a>
+            <div class="btn-wrap">
+              <a href="/thank-you" class="btn btn--outlined">Start free today</a>
+              <p class="btn-label">Button: SDK control (outlined)</p>
+            </div>
           </Variant>
 
           <Variant slot="b">
-            <a href="/thank-you" class="btn btn--navy">A/B test in 5 min →</a>
+            <div class="btn-wrap">
+              <a href="/thank-you" class="btn btn--filled">Start free today</a>
+              <p class="btn-label">Button: SDK variant B (filled)</p>
+            </div>
           </Variant>
 
         </Experiment>
       </div>
 
-      <!-- Right: trace of both layers -->
-      <div class="trace-box">
-        <p class="trace-title">What happened (2 layers):</p>
-        {steps.map(({ label, desc }) => (
-          <div class="step">
-            <span class="step-label">{label}</span>
-            <p class="step-desc" set:html={desc} />
+      <div class="right-col">
+        {featureCards.map(([icon, title, desc]) => (
+          <div class="card">
+            <span class="card__icon">{icon}</span>
+            <div>
+              <p class="card__title">{title}</p>
+              <p class="card__desc">{desc}</p>
+            </div>
           </div>
         ))}
-        <a href="https://github.com/andresclua/koryla-astro-demo-example/blob/main/netlify/edge-functions/koryla.ts" target="_blank" class="link-btn">
-          View koryla.ts on GitHub →
-        </a>
+
+        <div class="try-box">
+          <p class="try-label">Try combinations</p>
+          <div class="try-links">
+            <a href="/demo-combined" class="try-link">Control layout</a>
+            <a href="/demo-combined-b?utm_text=variation-1" class="try-link-b">B layout + filled btn</a>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -67,18 +70,30 @@ const steps = [
 </Layout>
 
 <style>
-  .page { max-width: 1100px; margin: 0 auto; padding: 80px 40px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+  .page { max-width: 1000px; margin: 0 auto; padding: 80px 40px; }
 
-  .btn { display: inline-block; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; color: #fff; }
-  .btn--terracotta { background: #C96A3F; }
-  .btn--navy       { background: #0F2235; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
 
-  .trace-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 20px; padding: 28px; }
-  .trace-title { font-size: 13px; font-weight: 700; color: #059669; margin-bottom: 16px; }
-  .step { margin-bottom: 12px; }
-  .step-label { font-size: 11px; font-weight: 700; color: #059669; text-transform: uppercase; }
-  .step-desc { font-size: 13px; color: #4b5563; margin-top: 2px; }
+  h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: -1.5px; color: #0F2235; line-height: 1.1; margin-bottom: 16px; }
 
-  .link-btn { display: inline-flex; align-items: center; gap: 6px; background: #059669; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; margin-top: 20px; }
+  .subtitle { font-size: 16px; color: #6b7280; line-height: 1.65; margin-bottom: 28px; }
+
+  .btn-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .btn { display: inline-block; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 14px; text-decoration: none; }
+  .btn--outlined { background: transparent; color: #C96A3F; border: 2px solid #C96A3F; }
+  .btn--filled   { background: #C96A3F; color: #fff; border: none; }
+  .btn-label { font-size: 12px; color: #9ca3af; }
+
+  .right-col { display: flex; flex-direction: column; gap: 12px; }
+
+  .card { display: flex; gap: 16px; align-items: flex-start; background: #F5EDE0; border: 1px solid #EAD9C4; border-radius: 14px; padding: 16px 20px; }
+  .card__icon { font-size: 22px; }
+  .card__title { font-size: 14px; font-weight: 700; color: #0F2235; }
+  .card__desc  { font-size: 13px; color: #6b7280; margin-top: 2px; }
+
+  .try-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px 20px; }
+  .try-label { font-size: 12px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .try-links { display: flex; gap: 8px; flex-wrap: wrap; }
+  .try-link { font-size: 12px; color: #0F2235; background: #fff; border: 1px solid #e5e7eb; padding: 5px 12px; border-radius: 8px; text-decoration: none; }
+  .try-link-b { font-size: 12px; color: #fff; background: #C96A3F; padding: 5px 12px; border-radius: 8px; text-decoration: none; }
 </style>

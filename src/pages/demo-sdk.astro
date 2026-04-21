@@ -2,77 +2,69 @@
 import Layout from '../layouts/Layout.astro'
 import Experiment from '../components/Experiment.astro'
 import Variant from '../components/Variant.astro'
-import DemoHeader from '../components/demo/DemoHeader.astro'
-import HowToTest from '../components/demo/HowToTest.astro'
-import CodeDiagram from '../components/demo/CodeDiagram.astro'
 ---
 
 <Layout title="Demo SDK" variant="SDK — /demo-sdk">
   <main class="page">
 
-    <DemoHeader
-      type="SDK"
-      badge="SDK EXPERIMENT"
-      title="Component-level A/B test"
-      description="Same URL, different CTA text. No URL rewrite needed — variant assigned server-side by <code>&lt;Experiment&gt;</code>."
-    />
+    <div style="display:inline-block;background:#F5EDE0;color:#C96A3F;font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;margin-bottom:24px;letter-spacing:.5px">
+      SDK EXPERIMENT · BUTTON STYLE
+    </div>
 
-    <!--
-      <Experiment> calls getVariant() in the Astro server.
-      It checks ?utm_text first, then the cookie, then assigns randomly.
-      Only the matching <Variant slot="..."> is rendered — the other never reaches the browser.
-    -->
+    <h1>Same URL.<br/>Different button.</h1>
+
+    <p class="subtitle">
+      The server reads <code>searchParams</code> to assign a variant.
+      No middleware, no cookies — just a URL parameter.
+    </p>
+
     <Experiment id="bb1e7469-062c-4426-98ad-9b5ca8869f1b">
 
-      <!-- Shown when no UTM param is present -->
       <Variant slot="control">
-        <a href="/thank-you" class="btn btn--terracotta">Start testing free →</a>
-        <p class="hint">control · default variant</p>
+        <div class="experiment-wrap">
+          <p class="showing">Currently showing: <strong>Control — outlined button</strong></p>
+          <a href="/thank-you" class="btn btn--outlined">Start free today</a>
+        </div>
       </Variant>
 
-      <!-- Shown only when ?utm_text=variation-1 is in the URL -->
       <Variant slot="b">
-        <a href="/thank-you" class="btn btn--navy">A/B test in 5 min →</a>
-        <p class="hint">variant b · triggered by <code>?utm_text=variation-1</code></p>
+        <div class="experiment-wrap">
+          <p class="showing">Currently showing: <strong>Variant B — filled button</strong></p>
+          <a href="/thank-you" class="btn btn--filled">Start free today</a>
+        </div>
       </Variant>
 
     </Experiment>
 
-    <HowToTest
-      steps={[
-        'Open this page without UTM → see control CTA (terracotta)',
-        'Add <code>?utm_text=variation-1</code> to the URL → see variant B CTA (navy)',
-      ]}
-      githubPath="/src/pages/demo-sdk.astro"
-    />
-
     <div class="try-box">
-      <p class="try-label">TRY BOTH VARIANTS</p>
+      <p class="try-label">Try both variants</p>
       <div class="try-links">
-        <a href="/demo-sdk" class="try-control">Control (terracotta)</a>
-        <a href="/demo-sdk?utm_text=variation-1" class="try-b">Variant B (navy) →</a>
+        <a href="/demo-sdk" class="try-control">Control (outlined)</a>
+        <a href="/demo-sdk?utm_text=variation-1" class="try-b">Variant B (filled) →</a>
       </div>
     </div>
-
-    <CodeDiagram lines={[
-      { color: 'comment',  text: '// What runs where' },
-      { color: 'edge',     text: 'Edge function → NOT involved (no URL rewrite for SDK experiments)' },
-      { color: 'sdk',      text: 'Astro server → getVariant() checks UTM param → assigns variant' },
-      { color: 'sdk',      text: 'Astro server → UTM match does NOT set a sticky cookie' },
-      { color: 'sdk',      text: '&lt;Experiment&gt; → renders only the active &lt;slot&gt;' },
-    ]} />
 
   </main>
 </Layout>
 
 <style>
-  .page { max-width: 900px; margin: 0 auto; padding: 80px 40px; text-align: center; display: flex; flex-direction: column; gap: 32px; }
-  .btn { display: inline-block; padding: 16px 40px; border-radius: 14px; font-weight: 700; font-size: 17px; text-decoration: none; color: #fff; }
-  .btn--terracotta { background: #C96A3F; }
-  .btn--navy       { background: #0F2235; }
-  .hint { font-size: 12px; color: #9ca3af; margin-top: 12px; }
-  .try-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; text-align: left; }
-  .try-label { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+  .page { max-width: 720px; margin: 0 auto; padding: 80px 40px; text-align: center; display: flex; flex-direction: column; gap: 32px; align-items: center; }
+
+  h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 800; letter-spacing: -1.5px; color: #0F2235; line-height: 1.1; }
+
+  .subtitle { font-size: 17px; color: #6b7280; max-width: 480px; line-height: 1.6; }
+  code { background: #F5EDE0; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
+
+  .experiment-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .showing { font-size: 13px; color: #9ca3af; }
+  .showing strong { color: #0F2235; }
+
+  .btn { display: inline-block; padding: 14px 36px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; }
+  .btn--outlined { background: transparent; color: #C96A3F; border: 2px solid #C96A3F; }
+  .btn--filled   { background: #C96A3F; color: #fff; }
+
+  .try-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; text-align: left; width: 100%; }
+  .try-label { font-size: 12px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
   .try-links { display: flex; gap: 12px; flex-wrap: wrap; }
   .try-control { font-size: 13px; color: #0F2235; background: #fff; border: 1px solid #e5e7eb; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-weight: 500; }
   .try-b { font-size: 13px; color: #fff; background: #C96A3F; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-weight: 500; }

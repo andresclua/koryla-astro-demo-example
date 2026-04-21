@@ -2,68 +2,72 @@
 import Layout from '../layouts/Layout.astro'
 import Experiment from '../components/Experiment.astro'
 import Variant from '../components/Variant.astro'
-import DemoHeader from '../components/demo/DemoHeader.astro'
-import HowToTest from '../components/demo/HowToTest.astro'
-import CodeDiagram from '../components/demo/CodeDiagram.astro'
 ---
 
-<!--
-  CONTROL variant of the combined experiment.
-  Layer 1 — Edge: assigned "control" → served this file via context.next().
-  Layer 2 — SDK: <Experiment> below handles a second, independent CTA split.
-  Add ?variant=b to force the edge to rewrite to /demo-combined-b.
--->
 <Layout title="Demo Combined" variant="control — /demo-combined">
   <main class="page">
 
-    <DemoHeader
-      type="COMBINED"
-      badge="COMBINED: EDGE + SDK · CONTROL"
-      title="Two layers of control"
-      description='Edge handles the <strong>big split</strong> (which page). SDK handles the <strong>fine detail</strong> (which component). Add <code>?variant=b</code> to force variant B.'
-    />
+    <div style="display:inline-block;background:#F5EDE0;color:#C96A3F;font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;margin-bottom:24px;letter-spacing:.5px">
+      COMBINED EXPERIMENT · EDGE + SDK
+    </div>
 
-    <!--
-      SDK layer: runs server-side AFTER the edge already decided which page to serve.
-      This experiment is independent — it can have its own traffic split and UTM rules.
-    -->
+    <h1>Koryla on Astro —<br/>two layers of control.</h1>
+
+    <p class="subtitle">
+      <strong>Layer 1 — Edge:</strong> the edge function assigned you the control layout (this single-column page).
+      <br/><br/>
+      <strong>Layer 2 — SDK:</strong> <code>searchParams</code> controls the button style.
+      Add <code>?utm_text=variation-1</code> to see the filled variant.
+    </p>
+
     <Experiment id="bb1e7469-062c-4426-98ad-9b5ca8869f1b">
 
-      <!-- SDK control: default CTA -->
       <Variant slot="control">
-        <a href="/thank-you" class="btn btn--terracotta">Start testing free →</a>
+        <div class="btn-wrap">
+          <a href="/thank-you" class="btn btn--outlined">Start free today</a>
+          <p class="btn-label">Button style: SDK control (outlined)</p>
+        </div>
       </Variant>
 
-      <!-- SDK variant b: triggered by ?utm_text=variation-1 -->
       <Variant slot="b">
-        <a href="/thank-you" class="btn btn--navy">A/B test in 5 min →</a>
+        <div class="btn-wrap">
+          <a href="/thank-you" class="btn btn--filled">Start free today</a>
+          <p class="btn-label">Button style: SDK variant B (filled)</p>
+        </div>
       </Variant>
 
     </Experiment>
 
-    <HowToTest
-      steps={[
-        'Visit this URL → edge assigns control (50%) → SDK assigns CTA variant',
-        'Add <code>?variant=b</code> → edge rewrites to /demo-combined-b (variant B layout)',
-        'Both layers can be tuned independently in the Koryla dashboard',
-      ]}
-      githubPath="/src/pages/demo-combined.astro"
-      btnColor="#059669"
-    />
-
-    <CodeDiagram lines={[
-      { color: 'comment', text: '// Two independent layers for this request' },
-      { color: 'edge',    text: 'Layer 1 — Edge: /demo-combined → assigned control → context.next()' },
-      { color: 'sdk',     text: 'Layer 2 — SDK: &lt;Experiment&gt; → UTM check → renders active CTA slot' },
-      { color: 'comment', text: '// Try: /demo-combined?variant=b → edge rewrites to /demo-combined-b' },
-    ]} />
+    <div class="try-box">
+      <p class="try-label">Try combinations</p>
+      <div class="try-links">
+        <a href="/demo-combined" class="try-link">Edge control + SDK control</a>
+        <a href="/demo-combined?utm_text=variation-1" class="try-link">Edge control + SDK B</a>
+      </div>
+      <p class="try-footnote">Clear cookies to be re-assigned by the edge layer.</p>
+    </div>
 
   </main>
 </Layout>
 
 <style>
-  .page { max-width: 900px; margin: 0 auto; padding: 80px 40px; text-align: center; display: flex; flex-direction: column; gap: 32px; align-items: center; }
-  .btn { display: inline-block; padding: 16px 40px; border-radius: 14px; font-weight: 700; font-size: 17px; text-decoration: none; color: #fff; }
-  .btn--terracotta { background: #C96A3F; }
-  .btn--navy       { background: #0F2235; }
+  .page { max-width: 720px; margin: 0 auto; padding: 80px 40px; display: flex; flex-direction: column; gap: 32px; align-items: flex-start; }
+
+  h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 800; letter-spacing: -1.5px; color: #0F2235; line-height: 1.1; }
+
+  .subtitle { font-size: 17px; color: #6b7280; line-height: 1.65; }
+  code { background: #F5EDE0; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
+  strong { color: #0F2235; }
+
+  .btn-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .btn { display: inline-block; padding: 14px 32px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; }
+  .btn--outlined { background: transparent; color: #C96A3F; border: 2px solid #C96A3F; }
+  .btn--filled   { background: #C96A3F; color: #fff; border: none; }
+  .btn-label { font-size: 12px; color: #9ca3af; }
+
+  .try-box { background: #F5EDE0; border: 1px solid #EAD9C4; border-radius: 16px; padding: 24px; width: 100%; }
+  .try-label { font-size: 12px; font-weight: 700; color: #C96A3F; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+  .try-links { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .try-link { font-size: 12px; color: #0F2235; background: #fff; border: 1px solid #EAD9C4; padding: 5px 12px; border-radius: 8px; text-decoration: none; }
+  .try-footnote { font-size: 11px; color: #9ca3af; margin: 0; }
 </style>

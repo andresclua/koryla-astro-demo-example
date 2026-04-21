@@ -3,23 +3,16 @@ import Layout from '../layouts/Layout.astro'
 
 const GH = 'https://github.com/andresclua/koryla-astro-demo-example/blob/main'
 
-// Feature cards shown in the right column
 const features = [
-  { icon: '⚡', title: 'Zero flicker',  desc: "Variants are served before the browser renders anything." },
+  { icon: '⚡', title: 'Zero flicker',  desc: "Variants are assigned before the browser renders anything." },
   { icon: '🔒', title: 'No client JS',  desc: "Works entirely server-side — ad blockers can't interfere." },
   { icon: '📊', title: 'Live results',  desc: "See impressions and conversions in your dashboard in real time." },
   { icon: '🔌', title: 'Any stack',     desc: "Next.js, Astro, WordPress, Nuxt — one API key, any platform." },
 ]
 ---
 
-<!--
-  VARIANT B: two-column layout with feature cards.
-  Reached via edge rewrite from /hero → /hero-b.
-  The interactive tour button explains each change vs. the control.
--->
-<Layout title="Homepage Hero" variant="variant-b — /hero-b">
+<Layout title="Homepage Hero" variant="b — /hero-b">
 
-  <!-- Driver.js styles — needed for the interactive tour -->
   <link slot="head" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css" />
   <style slot="head">
     @keyframes koryla-glow {
@@ -33,16 +26,15 @@ const features = [
   <main class="page">
     <div class="grid">
 
-      <!-- Left column: headline, CTA -->
       <div>
         <div id="tour-badge" class="badge">
           <span class="badge__dot"></span>
-          TRUSTED BY 1,200 TEAMS · NO CREDIT CARD NEEDED
+          TRUSTED BY 1,200 TEAMS · NO CREDIT CARD
         </div>
 
         <h1 id="tour-headline">
-          Your next best decision<br/>
-          <span class="accent">is one test away.</span>
+          Build what users<br/>
+          <span class="accent">actually want.</span>
         </h1>
 
         <p class="subtitle">
@@ -54,7 +46,6 @@ const features = [
         <p class="footnote">Free forever on the hobby plan · Cancel anytime</p>
       </div>
 
-      <!-- Right column: feature cards -->
       <div id="tour-cards" class="cards">
         {features.map(({ icon, title, desc }) => (
           <div class="card">
@@ -70,7 +61,6 @@ const features = [
     </div>
   </main>
 
-  <!-- Fixed button that launches the interactive tour -->
   <button id="tour-trigger" class="tour-btn">See what Koryla can do →</button>
 
   <script is:inline src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
@@ -131,7 +121,7 @@ const features = [
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
 
   .badge { display: inline-flex; align-items: center; gap: 8px; background: #FEF0E8; color: #C96A3F; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 999px; margin-bottom: 24px; }
-  .badge__dot { width: 6px; height: 6px; background: #C96A3F; border-radius: 50%; display: inline-block; }
+  .badge__dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block; }
 
   h1 { font-size: clamp(36px, 4vw, 56px); font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 20px; color: #0F2235; }
   .accent { color: #C96A3F; }

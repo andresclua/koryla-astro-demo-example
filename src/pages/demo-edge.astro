@@ -1,46 +1,61 @@
 ---
 import Layout from '../layouts/Layout.astro'
-import DemoHeader from '../components/demo/DemoHeader.astro'
-import CodeDiagram from '../components/demo/CodeDiagram.astro'
+
+const steps = [
+  'Request arrived at the Netlify edge function',
+  'Edge function checked your ky_ cookie — no assignment found',
+  'Random 50/50 split → you got control',
+  'Cookie set: ky_<experiment-id>=<variant-id>',
+  'context.next() — this page was served as-is',
+]
 ---
 
-<!--
-  CONTROL variant of the edge experiment.
-  The Netlify edge function ran BEFORE this page rendered:
-  it assigned this visitor to "control" and called context.next() — no rewrite.
-  The browser always sees /demo-edge regardless of which variant was assigned.
--->
 <Layout title="Demo Edge" variant="control — /demo-edge">
   <main class="page">
 
-    <DemoHeader
-      type="EDGE"
-      badge="EDGE EXPERIMENT · CONTROL"
-      title="You're seeing the control variant"
-      description='The Netlify edge function assigned you to <strong>control</strong>. The browser always sees <code>/demo-edge</code> — no redirect happened.'
-    />
+    <div style="display:inline-block;background:#F5EDE0;color:#C96A3F;font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;margin-bottom:24px;letter-spacing:.5px">
+      EDGE EXPERIMENT · TRANSPARENT URL REWRITE
+    </div>
 
-    <!-- Control CTA — 50% of visitors land here -->
-    <a href="/thank-you" class="btn">Get started free →</a>
+    <h1>You're on the control.</h1>
 
-    <CodeDiagram lines={[
-      { color: 'comment', text: '// What the edge function did for YOU' },
-      { color: 'edge',    text: 'Request: GET /demo-edge' },
-      { color: 'edge',    text: 'Edge: no cookie → random assignment → <span style="color:#86efac">control (50%)</span>' },
-      { color: 'edge',    text: 'Edge: target path === request path → context.next() (no rewrite)' },
-      { color: 'edge',    text: 'Edge: Set-Cookie ky_&lt;id&gt;=&lt;control-uuid&gt;' },
-      { color: 'comment', text: '// 50% of visitors get /demo-edge-b instead (same browser URL)' },
-    ]} />
+    <p class="subtitle">
+      You landed on <code>/demo-edge</code>.
+      The edge function checked your cookie and kept you on this page (50% probability).
+      The URL in your browser never changed.
+    </p>
 
-    <a href="https://github.com/andresclua/koryla-astro-demo-example/blob/main/src/pages/demo-edge.astro" target="_blank" class="link-btn">
-      View demo-edge.astro on GitHub →
-    </a>
+    <div class="trace-box">
+      <p class="trace-title">What happened server-side</p>
+      {steps.map((step, i) => (
+        <div class="step">
+          <span class="step-num">{i + 1}</span>
+          <p class="step-text">{step}</p>
+        </div>
+      ))}
+    </div>
+
+    <a href="/thank-you" class="btn">Trigger a conversion →</a>
+    <p class="footnote">Clear your cookies and reload to try getting variant B.</p>
 
   </main>
 </Layout>
 
 <style>
-  .page { max-width: 900px; margin: 0 auto; padding: 80px 40px; text-align: center; display: flex; flex-direction: column; gap: 32px; align-items: center; }
-  .btn { display: inline-block; background: #C96A3F; color: #fff; padding: 16px 40px; border-radius: 14px; font-weight: 700; font-size: 17px; text-decoration: none; }
-  .link-btn { display: inline-flex; align-items: center; gap: 6px; background: #C96A3F; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; }
+  .page { max-width: 720px; margin: 0 auto; padding: 80px 40px; }
+
+  h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 800; letter-spacing: -1.5px; color: #0F2235; margin-bottom: 16px; line-height: 1.1; }
+
+  .subtitle { font-size: 17px; color: #6b7280; line-height: 1.65; margin-bottom: 40px; }
+  code { background: #F5EDE0; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
+
+  .trace-box { background: #F5EDE0; border: 1px solid #EAD9C4; border-radius: 20px; padding: 28px; margin-bottom: 32px; }
+  .trace-title { font-size: 11px; font-weight: 700; color: #C96A3F; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 16px; }
+  .step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+  .step:last-child { margin-bottom: 0; }
+  .step-num { width: 22px; height: 22px; border-radius: 50%; background: #FEF0E8; color: #C96A3F; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-text { font-size: 14px; color: #4b5563; line-height: 1.5; margin: 0; }
+
+  .btn { display: inline-block; background: #C96A3F; color: #fff; padding: 12px 28px; border-radius: 10px; font-weight: 600; font-size: 14px; text-decoration: none; }
+  .footnote { margin-top: 16px; font-size: 12px; color: #9ca3af; }
 </style>
