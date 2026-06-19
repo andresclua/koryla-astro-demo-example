@@ -9,3 +9,7 @@ dist/
 
 # Superpowers internals
 .superpowers/
+
+# Environment variables
+.env
+.env.local
