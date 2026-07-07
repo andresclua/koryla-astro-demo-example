@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro'
-import Experiment from '../components/Experiment.astro'
-import Variant from '../components/Variant.astro'
+
+const sdkVariation = new URL(Astro.request.url).searchParams.get('utm_koryla') === 'variation-1'
 ---
 
 <Layout title="Demo Combined" variant="control — /demo-combined">
@@ -16,33 +16,23 @@ import Variant from '../components/Variant.astro'
     <p class="subtitle">
       <strong>Layer 1 — Edge:</strong> the edge function assigned you the control layout (this single-column page).
       <br/><br/>
-      <strong>Layer 2 — SDK:</strong> <code>searchParams</code> controls the button style.
-      Add <code>?utm_text=variation-1</code> to see the filled variant.
+      <strong>Layer 2 — SDK:</strong> <code>?utm_koryla=variation-1</code> changes headline, copy and button simultaneously.
     </p>
 
-    <Experiment id="bb1e7469-062c-4426-98ad-9b5ca8869f1b">
-
-      <Variant slot="control">
-        <div class="btn-wrap">
-          <a href="/thank-you" class="btn btn--outlined">Start free today</a>
-          <p class="btn-label">Button style: SDK control (outlined)</p>
-        </div>
-      </Variant>
-
-      <Variant slot="b">
-        <div class="btn-wrap">
-          <a href="/thank-you" class="btn btn--filled">Start free today</a>
-          <p class="btn-label">Button style: SDK variant B (filled)</p>
-        </div>
-      </Variant>
-
-    </Experiment>
+    <div class="sdk-box">
+      <p class="sdk-headline">{sdkVariation ? 'Stop guessing. Start winning.' : 'The fastest way to A/B test.'}</p>
+      <p class="sdk-sub">{sdkVariation ? 'Run your first experiment in minutes, not weeks.' : 'No flicker. No latency. Just results.'}</p>
+      <a href="/thank-you" class={sdkVariation ? 'btn btn--filled' : 'btn btn--outlined'}>
+        {sdkVariation ? 'Make it happen →' : 'Get started →'}
+      </a>
+      <p class="btn-label">SDK: {sdkVariation ? 'variation-1' : 'control'}</p>
+    </div>
 
     <div class="try-box">
       <p class="try-label">Try combinations</p>
       <div class="try-links">
         <a href="/demo-combined" class="try-link">Edge control + SDK control</a>
-        <a href="/demo-combined?utm_text=variation-1" class="try-link">Edge control + SDK B</a>
+        <a href="/demo-combined?utm_koryla=variation-1" class="try-link">Edge control + SDK B</a>
       </div>
       <p class="try-footnote">Clear cookies to be re-assigned by the edge layer.</p>
     </div>
@@ -59,11 +49,14 @@ import Variant from '../components/Variant.astro'
   code { background: #F5EDE0; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
   strong { color: #0F2235; }
 
-  .btn-wrap { display: flex; flex-direction: column; gap: 8px; }
-  .btn { display: inline-block; padding: 14px 32px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; }
+  .sdk-box { background: #F5EDE0; border: 1px solid #EAD9C4; border-radius: 16px; padding: 28px 32px; width: 100%; display: flex; flex-direction: column; gap: 8px; }
+  .sdk-headline { font-size: 22px; font-weight: 800; color: #0F2235; letter-spacing: -0.5px; margin: 0; }
+  .sdk-sub { font-size: 14px; color: #6b7280; margin: 0 0 8px; }
+
+  .btn { display: inline-block; padding: 14px 32px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; align-self: flex-start; }
   .btn--outlined { background: transparent; color: #C96A3F; border: 2px solid #C96A3F; }
   .btn--filled   { background: #C96A3F; color: #fff; border: none; }
-  .btn-label { font-size: 12px; color: #9ca3af; }
+  .btn-label { font-size: 12px; color: #9ca3af; margin: 0; }
 
   .try-box { background: #F5EDE0; border: 1px solid #EAD9C4; border-radius: 16px; padding: 24px; width: 100%; }
   .try-label { font-size: 12px; font-weight: 700; color: #C96A3F; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
