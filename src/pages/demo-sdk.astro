@@ -1,46 +1,37 @@
 ---
 import Layout from '../layouts/Layout.astro'
-import Experiment from '../components/Experiment.astro'
-import Variant from '../components/Variant.astro'
+
+const sdkVariation = new URL(Astro.request.url).searchParams.get('utm_koryla') === 'variation-1'
 ---
 
 <Layout title="Demo SDK" variant="SDK — /demo-sdk">
   <main class="page">
 
     <div style="display:inline-block;background:#F5EDE0;color:#C96A3F;font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;margin-bottom:24px;letter-spacing:.5px">
-      SDK EXPERIMENT · BUTTON STYLE
+      SDK EXPERIMENT · CONTENT + STYLE
     </div>
 
-    <h1>Same URL.<br/>Different button.</h1>
+    <h1>Same URL.<br/>Different content.</h1>
 
     <p class="subtitle">
-      The server reads <code>searchParams</code> to assign a variant.
-      No middleware, no cookies — just a URL parameter.
+      <code>getVariant()</code> runs server-side during SSR.
+      The variant is assigned before any HTML is sent — same URL, different content, zero flicker.
     </p>
 
-    <Experiment id="bb1e7469-062c-4426-98ad-9b5ca8869f1b">
-
-      <Variant slot="control">
-        <div class="experiment-wrap">
-          <p class="showing">Currently showing: <strong>Control — outlined button</strong></p>
-          <a href="/thank-you" class="btn btn--outlined">Start free today</a>
-        </div>
-      </Variant>
-
-      <Variant slot="b">
-        <div class="experiment-wrap">
-          <p class="showing">Currently showing: <strong>Variant B — filled button</strong></p>
-          <a href="/thank-you" class="btn btn--filled">Start free today</a>
-        </div>
-      </Variant>
-
-    </Experiment>
+    <div class="sdk-box">
+      <p class="sdk-headline">{sdkVariation ? 'Stop guessing. Start winning.' : 'The fastest way to A/B test.'}</p>
+      <p class="sdk-sub">{sdkVariation ? 'Run your first experiment in minutes, not weeks.' : 'No flicker. No latency. Just results.'}</p>
+      <a href="/thank-you" class={sdkVariation ? 'btn btn--filled' : 'btn btn--outlined'}>
+        {sdkVariation ? 'Make it happen →' : 'Get started →'}
+      </a>
+      <p class="btn-label">SDK: {sdkVariation ? 'variation-1' : 'control'}</p>
+    </div>
 
     <div class="try-box">
       <p class="try-label">Try both variants</p>
       <div class="try-links">
-        <a href="/demo-sdk" class="try-control">Control (outlined)</a>
-        <a href="/demo-sdk?utm_text=variation-1" class="try-b">Variant B (filled) →</a>
+        <a href="/demo-sdk" class="try-control">Control</a>
+        <a href="/demo-sdk?utm_koryla=variation-1" class="try-b">Variation-1 →</a>
       </div>
     </div>
 
@@ -55,13 +46,14 @@ import Variant from '../components/Variant.astro'
   .subtitle { font-size: 17px; color: #6b7280; max-width: 480px; line-height: 1.6; }
   code { background: #F5EDE0; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
 
-  .experiment-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-  .showing { font-size: 13px; color: #9ca3af; }
-  .showing strong { color: #0F2235; }
+  .sdk-box { background: #F5EDE0; border: 1px solid #EAD9C4; border-radius: 16px; padding: 28px 32px; width: 100%; display: flex; flex-direction: column; gap: 8px; text-align: left; }
+  .sdk-headline { font-size: 22px; font-weight: 800; color: #0F2235; letter-spacing: -0.5px; margin: 0; }
+  .sdk-sub { font-size: 14px; color: #6b7280; margin: 0 0 8px; }
 
-  .btn { display: inline-block; padding: 14px 36px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; }
+  .btn { display: inline-block; padding: 14px 32px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; align-self: flex-start; }
   .btn--outlined { background: transparent; color: #C96A3F; border: 2px solid #C96A3F; }
-  .btn--filled   { background: #C96A3F; color: #fff; }
+  .btn--filled   { background: #C96A3F; color: #fff; border: none; }
+  .btn-label { font-size: 12px; color: #9ca3af; margin: 0; }
 
   .try-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; text-align: left; width: 100%; }
   .try-label { font-size: 12px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
