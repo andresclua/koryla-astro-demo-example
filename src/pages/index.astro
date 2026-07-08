@@ -10,28 +10,21 @@ const demos = [
     color: '#C96A3F', bg: '#FEF0E8',
   },
   {
-    href: '/pricing', number: '02', type: 'Edge · Content',
-    title: 'Pricing Page Test',
-    description: 'Two entirely separate pricing pages. The edge sends half the traffic to /pricing-b — a completely different pricing structure.',
-    what: ['Control: 3-tier grid (Free / Starter / Growth)', 'Variant B: 2-tier with annual billing toggle'],
-    color: '#0F2235', bg: '#F5EDE0',
-  },
-  {
-    href: '/demo-edge', number: '03', type: 'Edge · URL rewrite',
+    href: '/demo-edge', number: '02', type: 'Edge · URL rewrite',
     title: 'Edge Rewrite Explainer',
     description: 'Visual walkthrough of how the edge intercepts a request and rewrites the URL server-side — the browser never sees the internal path.',
     what: ['Control: Light page — steps shown on white background', 'Variant B: Dark page — same steps, navy background'],
     color: '#0F2235', bg: '#f0f4f8',
   },
   {
-    href: '/demo-sdk', number: '04', type: 'SDK · UTM',
+    href: '/demo-sdk', number: '03', type: 'SDK · UTM',
     title: 'SDK Content Test',
     description: 'No edge rewrite — the server reads ?utm_koryla and renders a different content block. Same URL, zero cookies.',
     what: ['Control: "The fastest way to A/B test." + outlined button', 'Variation-1: "Stop guessing. Start winning." + filled button — add ?utm_koryla=variation-1'],
     color: '#C96A3F', bg: '#FEF0E8',
   },
   {
-    href: '/demo-combined', number: '05', type: 'Edge + SDK',
+    href: '/demo-combined', number: '04', type: 'Edge + SDK',
     title: 'Combined Layers',
     description: 'Two independent layers: edge controls the page layout, SDK controls the content block. Four possible combinations from one URL.',
     what: ['Layer 1 (Edge): single-col control vs two-col variant B', 'Layer 2 (SDK): control copy vs variation-1 — add ?utm_koryla=variation-1'],
@@ -45,14 +38,14 @@ const demos = [
 
     <header class="header">
       <span class="badge">LIVE DEMO · ASTRO + NETLIFY EDGE</span>
-      <h1>Five ways to A/B test<br/>with Astro</h1>
+      <h1>Four ways to A/B test<br/>with Astro</h1>
       <p class="subtitle">
         Each experiment is live — powered by a <code>Netlify Edge Function</code>.
         The server assigns variants before any HTML is sent. Zero flicker, zero JS overhead.
       </p>
       <div class="status">
         <span class="status__dot"></span>
-        Edge function active on /hero · /pricing · /demo-edge · /demo-combined
+        Edge function active on /hero · /demo-edge · /demo-combined
       </div>
     </header>
 
