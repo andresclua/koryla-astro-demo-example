@@ -128,8 +128,8 @@ The `api_secret` never reaches the browser. Events are ad-block resistant.
 This repo is the Astro reference implementation. The same architecture applies to:
 
 - **Next.js** — middleware runs before rendering (equivalent to edge layer), React Server Components for SDK layer
-- **WordPress** — PHP hook runs before template render, edge function on Cloudflare or Netlify
 - **Nuxt** — server middleware + `useAsyncData` for SDK layer
+- **Webflow / no-SSR platforms** — Cloudflare Worker in front of the origin (see [koryla-worker](https://github.com/andresclua/koryla-worker))
 
 The core logic (`getVariant`, `assignVariant`, event firing) is platform-agnostic. The adapter layer changes per platform.
 

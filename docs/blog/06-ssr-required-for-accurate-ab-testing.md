@@ -86,7 +86,7 @@ If you're on Astro: switch `output: 'static'` to `output: 'server'`, add the `@a
 
 If you're on Next.js: middleware already runs before rendering. No configuration change needed.
 
-If you're on a CMS like WordPress: a Cloudflare Worker or Netlify edge function in front of your origin provides the same capability without touching the CMS.
+If you're on a platform without SSR, like Webflow or a static site: a Cloudflare Worker or Netlify edge function in front of your origin provides the same capability without touching the origin.
 
 The platform is less important than the principle: variant assignment happens before the HTML is generated, and analytics events leave from the server.
 
