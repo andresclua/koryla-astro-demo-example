@@ -48,8 +48,8 @@ const variantLabel = result ? `${result.variant.name} (${result.variantId.slice(
         <span class="variant__badge variant__badge--control">CONTROL VARIANT</span>
         <h2>Start testing in 5 minutes</h2>
         <p>Deploy a Cloudflare Worker, create an experiment, and get live results — no code changes to your site.</p>
-        <a href="/thank-you" class="btn btn--dark">Get started free</a>
-        <p class="footnote">No credit card · Free forever on hobby plan</p>
+        <a href="/thank-you" class="btn btn--dark">Get started</a>
+        <p class="footnote">No contracts · Cancel anytime</p>
       </section>
 
     ) : (
@@ -58,8 +58,8 @@ const variantLabel = result ? `${result.variant.name} (${result.variantId.slice(
         <span class="variant__badge variant__badge--b">VARIANT B</span>
         <h2>A/B test anything — without touching your code</h2>
         <p>Koryla runs at the edge. Your site stays exactly the same — the visitor just sees a different variant.</p>
-        <a href="/thank-you" class="btn btn--terracotta">Try Koryla free</a>
-        <p class="footnote">No credit card · Unlimited experiments on growth plan</p>
+        <a href="/thank-you" class="btn btn--terracotta">Try Koryla</a>
+        <p class="footnote">No contracts · Cancel anytime</p>
       </section>
 
     )}
@@ -83,8 +83,6 @@ const isControl = !result || result.variant.is_control</code></pre>
 
     <nav class="page-nav">
       <a href="/">← Homepage (URL-rewrite demo)</a>
-      <span>·</span>
-      <a href="/pricing">Pricing demo →</a>
     </nav>
 
   </main>
