@@ -25,6 +25,11 @@ interface SplitResult {
 const COOKIE_PREFIX = 'ky_'
 const CACHE_TTL = 60_000
 
+// Hostname of the site, sent as X-Koryla-Host (the API key is bound to this domain).
+// One deployment serves one host, so a module-level value is enough.
+let SITE_HOST = ''
+const hostHeader = (): Record<string, string> => (SITE_HOST ? { 'X-Koryla-Host': SITE_HOST } : {})
+
 function createSplitEngine(options: { apiKey: string; apiUrl: string }) {
   const { apiKey, apiUrl } = options
   let cachedExperiments: Experiment[] = []
@@ -34,7 +39,7 @@ function createSplitEngine(options: { apiKey: string; apiUrl: string }) {
     if (Date.now() - cachedAt < CACHE_TTL) return cachedExperiments
     try {
       const res = await fetch(`${apiUrl}/api/worker/config`, {
-        headers: { Authorization: `Bearer ${apiKey}` },
+        headers: { Authorization: `Bearer ${apiKey}`, ...hostHeader() },
       })
       if (!res.ok) return cachedExperiments
       cachedExperiments = await res.json() as Experiment[]
@@ -145,6 +150,7 @@ async function fireEvent(payload: {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${API_KEY}`,
+        ...hostHeader(),
       },
       body: JSON.stringify(payload),
     })
@@ -183,6 +189,7 @@ export default async function handler(request: Request, context: NetlifyContext)
   // Check conversion URLs FIRST — before any experiment routing
   // This prevents conversion pages from being accidentally rewritten
   const reqUrl = new URL(request.url)
+  SITE_HOST = reqUrl.hostname
   const experiments = await engine.getActiveExperiments()
   const reqPath = reqUrl.pathname.replace(/\/$/, '') || '/'
   let isConversionPage = false

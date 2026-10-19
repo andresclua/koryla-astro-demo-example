@@ -10,8 +10,9 @@ const COOKIE_PREFIX = 'ky_'
 // For SDK experiments we do it here explicitly so it's visible in the code.
 if (apiKey) {
   try {
+    const host = new URL(Astro.request.url).hostname
     const res = await fetch(`${apiUrl}/api/worker/config`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
+      headers: { Authorization: `Bearer ${apiKey}`, 'X-Koryla-Host': host },
     })
     if (res.ok) {
       const experiments = await res.json() as Array<{
@@ -43,7 +44,7 @@ if (apiKey) {
         // Fire conversion — non-blocking
         fetch(`${apiUrl}/api/worker/event`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}`, 'X-Koryla-Host': host },
           body: JSON.stringify({ experiment_id: exp.id, variant_id: variantId, session_id: sessionId, event_type: 'conversion', metadata: enrichment }),
         }).catch(() => {})
       }

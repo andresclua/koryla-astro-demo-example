@@ -44,7 +44,7 @@ if (result && apiKey) {
 
   fetch(`${apiUrl}/api/worker/event`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}`, 'X-Koryla-Host': reqUrl.hostname },
     body: JSON.stringify({
       experiment_id: result.experiment.id,
       variant_id: result.variantId,

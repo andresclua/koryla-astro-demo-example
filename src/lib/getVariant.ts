@@ -14,11 +14,11 @@ export interface VariantResult {
 
 const cache: { experiments: Experiment[]; cachedAt: number } = { experiments: [], cachedAt: 0 }
 
-async function fetchConfig(apiKey: string, apiUrl: string): Promise<Experiment[]> {
+async function fetchConfig(apiKey: string, apiUrl: string, host: string): Promise<Experiment[]> {
   if (Date.now() - cache.cachedAt < CACHE_TTL) return cache.experiments
   try {
     const res = await fetch(`${apiUrl}/api/worker/config`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
+      headers: { Authorization: `Bearer ${apiKey}`, 'X-Koryla-Host': host },
     })
     if (res.ok) {
       cache.experiments = await res.json() as Experiment[]
@@ -57,7 +57,7 @@ export async function getVariant(
   experimentId: string,
   options: { apiKey: string; apiUrl: string },
 ): Promise<VariantResult | null> {
-  const experiments = await fetchConfig(options.apiKey, options.apiUrl)
+  const experiments = await fetchConfig(options.apiKey, options.apiUrl, new URL(request.url).hostname)
   const experiment = experiments.find(e => e.id === experimentId)
   if (!experiment || !experiment.variants.length) return null
 
